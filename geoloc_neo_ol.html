@@ -16,12 +16,12 @@
     <p>Identifiant radio</p>
     <form id="myForm" onsubmit="return false;">
       <div id="idInputDiv"><input id="idInput" type="text" name="idRadio"></div>
-      <a href="#"><img src="images/bicycle.png" onclick="login('b_')" alt="vélo"></a>
-      <a href="#"><img src="images/bike.png" onclick="login('m_')" alt="moto"></a>
-      <a href="#"><img src="images/car.png" onclick="login('c_')" alt="voiture"></a><br>
-      <a href="#"><img src="images/policeman.png" onclick="login('p_')" alt="piéton"></a>
-      <a href="#"><img src="images/office.png" onclick="login('o_')" alt="bureau"></a>
-      <a href="#"><img src="images/boat.png" onclick="login('f_')" alt="bateau"></a>
+      <a href="#"><img src="images/bicycle.png" onclick="login('b_')" alt="vélo" class="imgButton"></a>
+      <a href="#"><img src="images/bike.png" onclick="login('m_')" alt="moto" class="imgButton"></a>
+      <a href="#"><img src="images/car.png" onclick="login('c_')" alt="voiture" class="imgButton"></a><br>
+      <a href="#"><img src="images/policeman.png" onclick="login('p_')" alt="piéton" class="imgButton"></a>
+      <a href="#"><img src="images/office.png" onclick="login('o_')" alt="bureau" class="imgButton"></a>
+      <a href="#"><img src="images/boat.png" onclick="login('f_')" alt="bateau" class="imgButton"></a>
     </form>
   </div>
 
@@ -150,11 +150,20 @@
 
     vectorSource = new ol.source.Vector({});
 
+    var freepik = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
+    var plainicon = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon" title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
     map = new ol.Map({
       target: 'map',
       layers: [
         new ol.layer.Tile({
           source: new ol.source.XYZ({
+            attributions : [freepik, plainicon],
             tileUrlFunction: function(tileCoord, pixelRatio, projection) {
               var z = tileCoord[0];
               var x = tileCoord[1];
