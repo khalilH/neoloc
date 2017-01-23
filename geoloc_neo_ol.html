@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>POC Geoloc - OL XYZ</title>
+  <title>POC Geoloc - OL</title>
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
 
@@ -235,7 +235,6 @@
   }
 
   // Methode appelée a chaque modification de la vue de la map
-  // A FAIRE voir sur tablette (screenOrientation change)
   function recenterMap() {
     console.log("recenter");
     var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
@@ -253,15 +252,13 @@
       function(position) {
         if (!isGPSReady) {
           isGPSReady = true;
-          // permet de desactiver le clic sur la carte pour indiquer sa position
+          // desactive le clic sur la carte pour indiquer manuellement sa position
           closeNotification();
         }
         updatePosition(position.coords);
       },
       function(error) {
         closeNotification();
-        // arret de watch position si erreur dans la localisation ??
-        // navigator.geolocation.clearWatch(watchID);
         showError(error.message);
       },
       {maximumAge: 5000, enableHighAccuracy: true}
@@ -378,15 +375,6 @@
       }
     });
   }
-
-  // Appel a l'API REST pour supprimer une Feature
-  // Pour DEBUG, utilisee nulle part dans ce fichier pour l'instant
-  function deleteFeature(objId) {
-    var url = WSURL + '/deleteFeatures?f=json&objectIds='+objId;
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", url, true);
-    xhttp.send();
-  };
 
   // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
   // si et seulement si j'existe deja
