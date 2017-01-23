@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>POC Geoloc - OL</title>
+  <link rel="stylesheet" href="geoloc_neo.css">
+  <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
+
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div id="idDiv" >
+    <p>Identifiant radio</p>
+    <form id="myForm" onsubmit="return false;">
+      <div id="idInputDiv"><input id="idInput" type="text" name="idRadio"></div>
+      <a href="#"><img src="images/bicycle.png" onclick="login('b_')" alt="vélo"></a>
+      <a href="#"><img src="images/bike.png" onclick="login('m_')" alt="moto"></a>
+      <a href="#"><img src="images/car.png" onclick="login('c_')" alt="voiture"></a><br>
+      <a href="#"><img src="images/policeman.png" onclick="login('p_')" alt="piéton"></a>
+      <a href="#"><img src="images/office.png" onclick="login('o_')" alt="bureau"></a>
+      <a href="#"><img src="images/boat.png" onclick="login('f_')" alt="bateau"></a>
+    </form>
+  </div>
+
+  <div id="error" class="popup" style="display:none"></div>
+  <div id="notification" class="popup" style="display:none"></div>
+
+  <div id="centerDiv">
+    <div id="centerUI">
+      <div id="centerText">
+        Centrer la carte
+      </div>
+    </div>
+  </div>
+  <script src="openlayers/ol.js"></script>
+  <script src="proj4js/dist/proj4-src.js"></script>
+  <script src="jquery-3.1.1.min.js"></script>
+  <script>
+  const WSURL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services/PP/DSPAPTabletteNeo/FeatureServer/0';
+  const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
+  const TILE_URL = BASE_URL + '/PP/FOND_PP_FINAL_512/MapServer';
+  var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';
+  const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+
+  const SECOND_IN_MILLIS = 1000;
+  const MINUTE_IN_MILLIS = 60*SECOND_IN_MILLIS;
+
+  const REFRESH_TIME = 6 * SECOND_IN_MILLIS;
+
+  const EARTH_RADIUS = 6371.01;
+  const maxExtent =
+  {
+    'xmin' : 539296.8634946088,
+    'ymin' : 6778524.307136604,
+    'xmax' : 757843.1339204831,
+    'ymax' : 6900762.051612093,
+    'spatialReference' : {
+      'wkid' : 102110,
+      'latestWkid' : 2154
+    }
+  }
+
+  const _E7 = Math.pow(10, 7);
+  const RESOLUTIONS = [
+    1322.9193125052918,
+    529.1677250021168,
+    264.5838625010584,
+    185.20870375074085,
+    119.06273812547626,
+    92.60435187537043,
+    66.1459656252646,
+    39.687579375158755,
+    26.458386250105836,
+    13.229193125052918,
+    6.614596562526459,
+    2.6458386250105836,
+    1.3229193125052918,
+    0.7937515875031751,
+    0.26458386250105836,
+    0.13229193125052918,
+    0.06614596562526459
+  ]
+
+  var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
+  var map, outSR;
+  var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
+  var vectorSource;
+  var allowXHR = true;
+
+  // Saisie de l'identifiant Radio
+  function login(type) {
+    var form = document.getElementById('myForm');
+    var idRadio = form.idRadio.value;
+    if (idRadio != '0000' && idRadio != '') {
+      id = type+idRadio;
+      $('#idDiv').fadeOut(400);
+      start();
+    } else {
+      showError('identifiant inconnu');
+    }
+  }
+
+  // Lancement de l'application
+  function start() {
+    if (navigator.geolocation) {
+      openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
+      initMap();
+    } else {
+      showError("Géolocalisation non supportée");
+    }
+  }
+
+  // Initialisation de la map, du bouton 'centrer la carte'
+  // + Gestion des events (singleclick et moveend)
+  function initMap() {
+    proj4.defs("EPSG:2154", "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+    var point;
+
+    outSR = {"wkid":102110,"latestWkid":2154}; // Referentiel de Lambert93 sous le format connu d'esri
+
+    var myLastFeature = getMyFeature(id);   // Recuperation de ma feature si elle existe
+    if (myLastFeature != null) {
+      objectId = myLastFeature.attributes.objectid;
+      console.log(objectId);
+      point = [myLastFeature.geometry.x, myLastFeature.geometry.y];
+    } else {
+      point = proj4('EPSG:4326', LAMBERT93, [2.362765, 48.841291]);
+      console.log("je n'ai pas de feature");
+    }
+    sessionStorage.lastPosition = JSON.stringify(point);
+
+    // Debut d'initialisation de l'objet map
+    var EPSG_2154 = new ol.proj.Projection({
+      code: 'EPSG:2154',
+      extent: [503514.6000000015, 6683176.3999999985, 849432.8, 6997025],
+      units: 'm'
+    });
+
+    // import de la projection de lambert93 dans openlayers
+    ol.proj.addProjection(EPSG_2154);
+
+    var tileg = new ol.tilegrid.TileGrid({
+      origin: [-3.55975*_E7, 4.89531*_E7],
+      resolutions: RESOLUTIONS,
+      tileSize: 512
+    });
+
+    vectorSource = new ol.source.Vector({});
+
+    map = new ol.Map({
+      target: 'map',
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.XYZ({
+            tileUrlFunction: function(tileCoord, pixelRatio, projection) {
+              var z = tileCoord[0];
+              var x = tileCoord[1];
+              var y = -tileCoord[2] - 1;
+              return URL_TEMPLATE.replace('{z}', z.toString())
+              .replace('{y}', y.toString())
+              .replace('{x}', x.toString());
+            },
+            projection: EPSG_2154,
+            tileGrid: tileg,
+          })
+        }),
+        new ol.layer.Vector({
+          source: vectorSource
+        })
+      ],
+      view: new ol.View({
+        center: point,
+        projection: EPSG_2154,
+        maxZoom:15,
+        minZoom:2,
+        zoom: 10
+      })
+    });
+    // Fin d'initialisation de l'objet map
+
+    // Gestion du click simple sur la carte pour l'initialisation manuelle
+    // de sa position en attente du fix GPS
+    var mapDiv = document.getElementById('map');
+    var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+
+    mapDiv.addEventListener('mousedown', function(event) {
+      mousedown_x = event.clientX;
+      mousedown_y = event.clientY;
+    });
+
+    mapDiv.addEventListener('mouseup', function(event) {
+      mouseup_x = event.clientX;
+      mouseup_y = event.clientY;
+
+      if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
+        if(!isGPSReady) {
+          var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
+          var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
+          mapPoint.spatialReference = JSON.parse(JSON.stringify(outSR));
+          var mapPoint_4326 = proj4(LAMBERT93, 'EPSG:4326', coordinates);
+          console.log(mapPoint);
+          console.log(mapPoint_4326);
+          // x = lng, y = lat pour mapPoint_4326
+          if (objectId == null) {
+            addFeature(mapPoint_4326[1], mapPoint_4326[0], 5, 203, 5, mapPoint);
+          } else {
+            updateFeature(mapPoint_4326[1], mapPoint_4326[0], 5, 203, 5, mapPoint);
+            lastDateUpdate = Date.now();
+          }
+          sessionStorage.lastPosition = JSON.stringify(coordinates);
+        }
+      }
+    })
+
+    // Gestion de l'evenement lorsque la vue de la carte change
+    map.on('moveend', function(event) {
+      if (!allowXHR) {allowXHR = true;}
+      getFeaturesInMapExtent();
+    });
+
+    initControls();
+    setInterval(getFeaturesInMapExtent, REFRESH_TIME);
+    getLocation();
+    getFeaturesInMapExtent();
+  }
+
+  // Initialisation du bouton permettant de recentrer la carte
+  function initControls() {
+    var centerUI = document.getElementById('centerUI');
+    centerUI.addEventListener('click', recenterMap);
+    document.getElementById('centerDiv').style.display = 'inline';
+  }
+
+  // Methode appelée a chaque modification de la vue de la map
+  function recenterMap() {
+    console.log("recenter");
+    var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
+    centerMap(lastPosition);
+  }
+
+  // Recentre la carte sur le point donné en argument
+  function centerMap(center) {
+    map.getView().animate({'center': center, zoom: 11, duration: 750});
+  }
+
+  // Initialisation du service de geolocalisation
+  function getLocation() {
+    watchID = navigator.geolocation.watchPosition(
+      function(position) {
+        if (!isGPSReady) {
+          isGPSReady = true;
+          // desactive le clic sur la carte pour indiquer manuellement sa position
+          closeNotification();
+        }
+        updatePosition(position.coords);
+      },
+      function(error) {
+        closeNotification();
+        showError(error.message);
+      },
+      {maximumAge: 5000, enableHighAccuracy: true}
+    );
+  }
+
+  // Met a jour la position sur la couche portal NEO si et seulement si la derniere
+  // mise a jour n'a pas eu lieu dans les 5 dernieres secondes
+  function updatePosition(coords) {
+    var lat = coords.latitude, lng = coords.longitude, accuracy = coords.accuracy,
+    alt = coords.altitude, heading = coords.heading, speed = coords.speed;
+    // speed est en mph
+    showNotification(lat+", "+lng+" - "+accuracy+"m"); // a supprimer
+    if (Date.now() - lastDateUpdate > 5 * SECOND_IN_MILLIS)  {
+      addFeature_wgs84(lat, lng, accuracy, heading, mphTokmph(speed));
+      lastDateUpdate = Date.now();
+    } else {
+      console.log("too soon");
+    }
+  }
+
+  // Utilise proj4js pour la conversion de la lat, lng vers la projection de lambert93
+  // Sauvegarde de la dernière position dans sessionStorage
+  // Envoi de la position au serveur (mise à jour ou création selon contexte)
+  function addFeature_wgs84(lat, lng, accuracy, heading, speed) {
+    var tmp = proj4('EPSG:4326', LAMBERT93, [lng, lat]);
+    var lastPosition = JSON.stringify([tmp[0], tmp[1]]);
+    sessionStorage.lastPosition = lastPosition;
+    var mapPoint_2154 = {'x': tmp[0], 'y': tmp[1]};
+    if (objectId == null) {
+      addFeature(lat, lng, accuracy, heading, speed, mapPoint_2154);
+    } else {
+      updateFeature(lat, lng, accuracy, heading, speed, mapPoint_2154);
+    }
+  }
+
+  // Appel à l'API REST pour créer une nouvelle Feature
+  function addFeature(lat, lng, accuracy, heading, speed, mapPoint) {
+    var neo_id = id ? id : 'ALPHA';
+
+    var attributes =
+    {
+      'neo_id' : neo_id,
+      'neo_lat' : lat,
+      'neo_lng' : lng,
+      'neo_accur' : accuracy,
+      // 'neo_lat' : Math.floor(heading),
+      // 'neo_lng' : Math.floor(speed),
+      'neo_timestamp' : Math.floor(Date.now() /1000)
+    };
+
+    var geometry = {'x' : mapPoint.x, 'y' : mapPoint.y};
+    var features = {'attributes' : attributes, 'geometry' : geometry};
+
+    var _url = WSURL + '/addFeatures?f=json&features='+JSON.stringify([features]);
+
+    $.ajax({
+      type: 'POST',
+      url : _url,
+      async: false,
+      timeout: 5000,
+      success : function(a,b,c) {
+        objectId = JSON.parse(a).addResults[0].objectId;
+        if (!allowXHR) {
+          allowXHR = true;
+        }
+        getFeaturesInMapExtent();
+        console.log(objectId);
+      },
+      error : function(a,b,c) {
+        if (b == 'timeout') {
+          showError("Perte de connexion");
+        }
+      }
+    });
+  }
+
+  // Appel à l'API REST pour mettre a jour une Feature existante
+  function updateFeature(lat, lng, accuracy, heading, speed, mapPoint) {
+    var neo_id = id ? id : 'ALPHA';
+
+    var attributes =
+    {
+      'OBJECTID' : objectId,
+      'neo_id' : neo_id,
+      'neo_lat' : lat,
+      'neo_lng' : lng,
+      'neo_accur' : accuracy,
+      // 'neo_lat' : Math.floor(heading),
+      // 'neo_lng' : Math.floor(speed),
+      'neo_timestamp' : Math.floor(Date.now() /1000)
+    };
+
+    var geometry = {'x' : mapPoint.x, 'y' : mapPoint.y};
+    var features = {'attributes' : attributes, 'geometry' : geometry};
+
+    var _url = WSURL + '/updateFeatures?f=json&features='+JSON.stringify([features]);
+
+    $.ajax({
+      type: 'POST',
+      url : _url,
+      async: false,
+      timeout: 5000,
+      success: function(a,b,c) {
+        if (!allowXHR) {
+          allowXHR = true;
+        }
+        getFeaturesInMapExtent();
+      },
+      error : function(a,b,c) {
+        if (b == 'timeout') {
+          showError("Perte de connexion");
+        }
+      }
+    });
+  }
+
+  // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
+  // si et seulement si j'existe deja
+  function getMyFeature() {
+    var res = null;
+    var _url = WSURL + '/query?f=json&geometry='+JSON.stringify(maxExtent)+'&outFields=*&where=neo_id%20=%20%27'+id+'%27';
+    $.ajax({
+      type: 'GET',
+      url : _url,
+      async: false,
+      success : function(a,b,c) {
+        var tmp = JSON.parse(a);
+        if (tmp && tmp.features && tmp.features[0] && tmp.features[0].attributes && tmp.features[0].geometry) {
+          res = tmp.features[0];
+        }
+      },
+      error : function(a,b,c) {
+        alert('error');
+      }
+    });
+    return res;
+  }
+
+  // Permet d'obtenir les limites(extent) de la carte en projection de lambert93
+  // dans le bon format pour effectuer une requete REST /query
+  function getMapExtent() {
+    var e = map.getView().calculateExtent(map.getSize());
+    var extent = {
+      'xmin': e[0],
+      'ymin': e[1],
+      'xmax': e[2],
+      'ymax': e[3],
+      'SpatialReference': {'wkid': 102110, 'latestWkid': 2154}
+    }
+    return extent;
+  }
+
+  // Permet de recuperer uniquement les features qui seront visibles sur la carte
+  function getFeaturesInMapExtent() {
+    if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
+      var res = null;
+      var geometry = getMapExtent();
+      var _url = WSURL + '/query?f=json&outFields=*&geometry='+JSON.stringify(geometry);
+      $.ajax({
+        type: 'GET',
+        url : _url,
+        async: true,
+        timeout: 5000,
+        success : function(a,b,c) {
+          var tmp = JSON.parse(a);
+          console.log(tmp);
+          if (tmp && tmp.features) {
+            res = tmp.features;
+            localFeatures = JSON.parse(JSON.stringify(tmp.features));
+            refresh(res);
+          }
+        },
+        error : function(a,b,c) {
+          if (b == 'timeout') {
+            console.log('timeout');
+            showError('Perte de connexion');
+            // A tester en exterieur quand les champs neo_speed et neo_heading seront rajoutes
+            // calculateNextPositions();
+            // document.getElementById('error').innerHTML = "Perte de connexion";
+            // $('#error').fadeIn(200).delay(400).fadeOut(200);
+          }
+        }
+      });
+      lastDateQuery = Date.now();
+      if (allowXHR) {allowXHR = false;}
+      return res;
+    } else {
+      console.log('TOO SOON - getFeaturesInMapExtent');
+    }
+  }
+
+  // Permet de mettre a jour l'affichage des features
+  function refresh(features) {
+    var i, length = features.length;
+    if (length == 0) return;
+    console.log('refresh');
+    vectorSource.clear();
+    for (i = 0; i < length ; i++) {
+      var feature = features[i];
+      var timestamp = feature.attributes.neo_timestamp * 1000;
+      var delta = Date.now() - timestamp;
+      if (delta > 60*6 * MINUTE_IN_MILLIS) {
+        continue;
+      }
+      if (feature.attributes.neo_accur > 24) {
+        addCircle(feature, delta);
+        addMarker(feature, delta);
+      } else {
+        addMarker(feature, delta);
+      }
+    }
+  }
+
+  // Permet de recuperer le prefixe de l'image .png a partir du 'type'
+  function getType(type) {
+    switch (type) {
+      case 'b_':
+      return 'bicycle';
+      break;
+      case 'm_':
+      return 'bike';
+      break;
+      case 'c_':
+      return 'car';
+      break;
+      case 'p_':
+      return 'policeman';
+      break;
+      case 'o_':
+      return 'office';
+      break;
+      case 'f_':
+      return 'boat';
+      break;
+      default:
+      console.error("getType : Je ne dois pas passer ici "+type);
+    }
+  }
+
+  // Permet de recuperer la couleur de l'image .png a partir d'une couleur
+  function getColor(color) {
+    switch (color) {
+      case 'red':
+      return 'R';
+      break;
+      case 'blue':
+      return 'B';
+      break;
+      case 'green':
+      return 'G';
+      break;
+      default:
+      console.error("getColor : je ne dois pas passer ici "+color);
+    }
+  }
+
+  // Permet de recuperer un code couleur a partir d'une couleur('red'|'green'|'blue')
+  function getColorRGB(color) {
+    switch (color) {
+      case 'red':
+      return '#F00';
+      break;
+      case 'blue':
+      return '#00F';
+      break;
+      case 'green':
+      return '#2EC854';
+      break;
+      default:
+      console.error("getColorRGB : je ne dois pas passer ici "+color);
+    }
+  }
+
+  // Permet de recuperer une couleur rgba a partir d'une couleur
+  function getColorRGBA(color) {
+    switch (color) {
+      case 'red':
+      return 'rgba(255, 0, 0, 0.1)';
+      break;
+      case 'blue':
+      return 'rgba(0, 0, 255, 0.1)';
+      break;
+      case 'green':
+      return 'rgba(0, 255, 0, 0.1)';
+      break;
+      default:
+      console.error("getColorRGBA : je ne dois pas passer ici "+color);
+    }
+  }
+
+  // Fonction de sytle d'un cercle d'incertitude
+  // Permet d'obtenir la bonne couleur d'un cercle d'incertitude
+  function circleStyle() {
+    return [
+      new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: this.get('color'),
+          width: 1
+        }),
+        fill: new ol.style.Fill({
+          color: getColorRGBA(this.get('color'))
+        })
+      })
+    ];
+  }
+
+  // Fonction de style d'un marker
+  // Permet d'obtenir la bonne icone et couleur d'une feature
+  function markerStyle() {
+    var zoom = map.getView().getZoom();
+    var color = this.get('color');
+    var suffixe = getColor(color);
+    var type = getType(this.get('type'));
+
+    return [
+      new ol.style.Style({
+        text: new ol.style.Text({
+          font: '14px Calibri',
+          fill: new ol.style.Fill({ color: getColorRGB(color) }),
+          offsetY: -15,
+          stroke: new ol.style.Stroke({
+            color: '#fff', width: 2
+          }),
+          text: zoom > 8 ? this.get('neo_id') : '', // revoir les param de zoom
+        }),
+        image: new ol.style.Icon(({
+          src: zoom < 5 ? 'images/dot'+suffixe+'.png':
+          zoom < 9 ? 'images/'+type+suffixe+'_16.png' :
+          'images/'+type+suffixe+'.png'
+        }))
+      })
+    ];
+  }
+
+  // Permet d'ajouter un cercle d'incertitude sur la map a partir d'une feature
+  // delta : temps depuis la derniere mise a jour de la feature
+  function addCircle(feature, delta) {
+    var neo_id = feature.attributes.neo_id;
+    var radius = feature.attributes.neo_accur;
+    var geometry = feature.geometry;
+    var circle = new ol.geom.Circle([geometry.x, geometry.y], radius);
+    var feat = new ol.Feature({geometry: circle});
+    if (neo_id == id) {
+      feat.set('color', 'red');
+    } else {
+      if (delta > 5 * MINUTE_IN_MILLIS) {
+        feat.set('color', 'blue');
+      } else {
+        feat.set('color', 'green');
+      }
+    }
+    feat.setStyle(circleStyle);
+    vectorSource.addFeature(feat);
+  }
+
+
+  // permet d'ajouter un marker sur la map a partir d'une feature
+  // delta : temps depuis la derniere mise a jour de la feature
+  function addMarker(feature, delta) {
+    var neo_id = feature.attributes.neo_id;
+    var geometry = feature.geometry;
+    var point = new ol.geom.Point([geometry.x, geometry.y]);
+    var feat = new ol.Feature({geometry: point});
+    if (neo_id == id) {
+      feat.set('color', 'red');
+    } else {
+      if (delta > 5 * MINUTE_IN_MILLIS) {
+        feat.set('color', 'blue');
+      } else {
+        feat.set('color', 'green');
+      }
+    }
+    feat.set('neo_id', neo_id.slice(2));
+    feat.set('type', neo_id.substring(0,2));
+    feat.setStyle(markerStyle);
+    vectorSource.addFeature(feat);
+  }
+
+
+  function degreeToRadian(angle) {
+    return angle * Math.PI / 180;
+  }
+
+  function radianToDegree(angle) {
+    return angle * 180 / Math.PI;
+  }
+
+  function mphTokmph(speed) {
+    return speed * 1.609344;
+  }
+
+  // Permet d'extrapoler une nouvelle position a partir des coordonness GPS,
+  // du cap, de la vitesse, et du temps ecoule depuis la derniere maj
+  // lat,lng in WGS48, speed in km/h, heading in degrees, time in seconds
+  function getNext(lat, lng, speed, heading, time) {
+    console.log('in : '+lat+','+lng);
+    console.log('speed: '+speed);
+    console.log('heading: '+heading);
+    console.log('time: '+time);
+    var kmDistance = speed * (time / 3600);
+
+    var headingRad = degreeToRadian(heading);
+
+    var distRatio = kmDistance / EARTH_RADIUS;
+    var distRatioSine = Math.sin(distRatio);
+    var distRatioCosine = Math.cos(distRatio);
+
+    var startLatRad = degreeToRadian(lat);
+    var startLngRad = degreeToRadian(lng);
+
+    var startLatCos = Math.cos(startLatRad);
+    var startLatSin = Math.sin(startLatRad);
+
+    var endLatRads = Math.asin((startLatSin * distRatioCosine) + (startLatCos * distRatioSine * Math.cos(headingRad)));
+
+    var endLonRads = startLngRad
+    + Math.atan2(Math.sin(headingRad) * distRatioSine * startLatCos,
+    distRatioCosine - startLatSin * Math.sin(endLatRads));
+
+    var newLat = radianToDegree(endLatRads);
+    var newLng = radianToDegree(endLonRads);
+
+    var obj = [newLng, newLat]
+    console.log(obj);
+    return obj;
+  }
+
+  // Permet d'extrapoler localement les nouvelles positions des features visibles
+  // Utilisé en cas de coupure réseau pour le moment
+  function calculateNextPositions() {
+    var now = Math.floor(Date.now()/1000);
+    var length = localFeatures.length;
+    var i;
+    for (i = 0; i < length; i++) {
+      var feature = localFeatures[i];
+      var then = feature.attributes.neo_timestamp;
+      var geometry = feature.geometry;
+      var speed = feature.attributes.neo_speed;
+      var heading = feature.attributes.neo_heading;
+      var lat = feature.attributes.neo_lat;
+      var lng = feature.attributes.neo_lng;
+      var newPosition = getNext(lat, lng, speed, heading, now - then);
+      var tmp = proj4('EPSG:4326', LAMBERT93, newPosition)
+      localFeatures[i].geometry.x = tmp[0];
+      localFeatures[i].geometry.y = tmp[1];
+    }
+    refresh(localFeatures);
+  }
+
+  // MESSAGES DE NOTIFICATION ET D'ERREUR
+  function showNotification(message) {
+    document.getElementById('notification').innerHTML = message;
+    $('#notification').fadeIn(400).delay(1500).fadeOut(400);
+  }
+
+  function openNotification(message) {
+    document.getElementById('notification').innerHTML = message;
+    $('#notification').fadeIn(500);
+  }
+
+  function closeNotification() {
+    $('#notification').fadeOut(200);
+  }
+
+  function showError(message) {
+    document.getElementById('error').innerHTML = message;
+    $('#error').fadeIn(400).delay(2000).fadeOut(400);
+  }
+
+  </script>
+</body>
+</html>
