@@ -80,6 +80,8 @@
   const _Y = 'neo_y';
   const _ACCURACY = 'neo_accur';
   const _TIMESTAMP = 'neo_timestamp';
+  const _HEADING = 'neo_heading';
+  const _SPEED = 'neo_speed';
 
   var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
   var map;
@@ -205,6 +207,7 @@
       var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
 
       mapDiv.addEventListener('mousedown', function(event) {
+        console.log(event);
         mousedown_x = event.clientX;
         mousedown_y = event.clientY;
       });
@@ -218,11 +221,10 @@
             var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
             var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
             console.log(mapPoint);
-            // x = lng, y = lat pour mapPoint_4326
             if (objectId == null) {
-              addFeature(5, 203, 5, mapPoint);
+              addFeature(5, 0, 0, mapPoint);
             } else {
-              updateFeature(5, 203, 5, mapPoint);
+              updateFeature(5, 0, 0, mapPoint);
               lastDateUpdate = Date.now();
             }
             sessionStorage.lastPosition = JSON.stringify(coordinates);
@@ -314,19 +316,21 @@
     }
   }
 
-  function createDocument(id, x, y, accuracy, timestamp) {
+  function createDocument(id, x, y, accuracy, heading, speed, timestamp) {
     var doc = {};
     doc[_ID] = id;
     doc[_X] = x;
     doc[_Y] = y;
     doc[_ACCURACY] = accuracy;
     doc[_TIMESTAMP] = timestamp;
+    doc[_HEADING] = heading;
+    doc[_SPEED] = speed;
     return doc;
   }
 
   // Appel à l'API REST pour créer une nouvelle Feature
   function addFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, Math.floor(Date.now() /1000));
+    var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
 
     client.index({
       index: INDEX,
@@ -368,7 +372,7 @@
 
   // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
   // si et seulement si j'existe deja
-  // deplacée dans la methode initMap car il y a du code a executer dans le callback
+  // deplacee dans la methode initMap car il y a du code a executer dans le callback
   // function getMyFeature() {
   //   client.search({
   //     index: INDEX,
@@ -410,19 +414,20 @@
         body: {
           query : {
             "bool" : {
-              "must" : {
-                "range" : {"neo_x": { "gte" : geometry.xmin, "lte" : geometry.xmax } },
-                "range" : {"neo_y": { "gte" : geometry.ymin, "lte" : geometry.ymax } }
-              }
+              "must" : [
+                {"range" : {"neo_x": { "gte" : geometry.xmin, "lte" : geometry.xmax } } },
+                {"range" : {"neo_y": { "gte" : geometry.ymin, "lte" : geometry.ymax } } }
+              ]
             }
           }
         },
-        timeout: '5s'
+        timeout: '5s',
+        size: 1000
       }, function(error, response) {
         if (error != undefined) {
           console.error(error);
         } else {
-          console.log(JSON.stringify(response.hits.hits));
+          console.log(JSON.stringify(response.hits.hits.length));
           refresh(response.hits.hits);
           // do something with results
           lastDateQuery = Date.now();
@@ -439,7 +444,7 @@
   // Permet de mettre a jour l'affichage des features
   function refresh(hits) {
     var i, length = hits.length;
-    if (length == 0) return;
+    // if (length == 0) return;
     console.log('refresh');
     vectorSource.clear();
     for (i = 0; i < length ; i++) {
@@ -626,74 +631,8 @@
   }
 
 
-  function degreeToRadian(angle) {
-    return angle * Math.PI / 180;
-  }
-
-  function radianToDegree(angle) {
-    return angle * 180 / Math.PI;
-  }
-
   function mphTokmph(speed) {
     return speed * 1.609344;
-  }
-
-  // Permet d'extrapoler une nouvelle position a partir des coordonness GPS,
-  // du cap, de la vitesse, et du temps ecoule depuis la derniere maj
-  // lat,lng in WGS48, speed in km/h, heading in degrees, time in seconds
-  function getNext(lat, lng, speed, heading, time) {
-    console.log('in : '+lat+','+lng);
-    console.log('speed: '+speed);
-    console.log('heading: '+heading);
-    console.log('time: '+time);
-    var kmDistance = speed * (time / 3600);
-
-    var headingRad = degreeToRadian(heading);
-
-    var distRatio = kmDistance / EARTH_RADIUS;
-    var distRatioSine = Math.sin(distRatio);
-    var distRatioCosine = Math.cos(distRatio);
-
-    var startLatRad = degreeToRadian(lat);
-    var startLngRad = degreeToRadian(lng);
-
-    var startLatCos = Math.cos(startLatRad);
-    var startLatSin = Math.sin(startLatRad);
-
-    var endLatRads = Math.asin((startLatSin * distRatioCosine) + (startLatCos * distRatioSine * Math.cos(headingRad)));
-
-    var endLonRads = startLngRad
-    + Math.atan2(Math.sin(headingRad) * distRatioSine * startLatCos,
-    distRatioCosine - startLatSin * Math.sin(endLatRads));
-
-    var newLat = radianToDegree(endLatRads);
-    var newLng = radianToDegree(endLonRads);
-
-    var obj = [newLng, newLat]
-    console.log(obj);
-    return obj;
-  }
-
-  // Permet d'extrapoler localement les nouvelles positions des features visibles
-  // Utilisé en cas de coupure réseau pour le moment
-  function calculateNextPositions() {
-    var now = Math.floor(Date.now()/1000);
-    var length = localFeatures.length;
-    var i;
-    for (i = 0; i < length; i++) {
-      var feature = localFeatures[i];
-      var then = feature.attributes.neo_timestamp;
-      var geometry = feature.geometry;
-      var speed = feature.attributes.neo_speed;
-      var heading = feature.attributes.neo_heading;
-      var lat = feature.attributes.neo_lat;
-      var lng = feature.attributes.neo_lng;
-      var newPosition = getNext(lat, lng, speed, heading, now - then);
-      var tmp = proj4('EPSG:4326', LAMBERT93, newPosition)
-      localFeatures[i].geometry.x = tmp[0];
-      localFeatures[i].geometry.y = tmp[1];
-    }
-    refresh(localFeatures);
   }
 
   // MESSAGES DE NOTIFICATION ET D'ERREUR

@@ -25,7 +25,7 @@
 
   var client = new $.es.Client({
     hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
-    apiVersion: '2.4'
+    // apiVersion: '2.4'
   });
 
   var _id;
@@ -107,12 +107,12 @@
     client.search({
       index: INDEX,
       body: {
-        query : {
+        "query" : {
           "bool" : {
-            "must" : {
-              "range" : {"neo_x": { "gte" : xmin, "lte" : xmax } },
-              "range" : {"neo_y": { "gte" : ymin, "lte" : ymax } }
-            }
+            "must" : [
+              {"range" : {"neo_x": { "gte" : xmin, "lte" : xmax } }},
+              {"range" : {"neo_y": { "gte" : ymin, "lte" : ymax } }}
+            ]
           }
         }
       },
@@ -151,6 +151,8 @@
   function _update() {
     update('test', 2.50, 49.0, 5, Date.now());
   }
+
+  get(652688, 6860095, 653796, 6860473);
   </script>
 </body>
 </html>
