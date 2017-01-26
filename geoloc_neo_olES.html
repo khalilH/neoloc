@@ -249,13 +249,13 @@
 
       mapDiv.addEventListener('mousedown', function(event) {
         console.log(event);
-        mousedown_x = event.clientX;
-        mousedown_y = event.clientY;
+        mousedown_x = event.layerX;
+        mousedown_y = event.layerY;
       });
 
       mapDiv.addEventListener('mouseup', function(event) {
-        mouseup_x = event.clientX;
-        mouseup_y = event.clientY;
+        mouseup_x = event.layerX;
+        mouseup_y = event.layerY;
 
         if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
           if(!isGPSReady) {
