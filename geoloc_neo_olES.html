@@ -84,17 +84,16 @@
   const _SPEED = 'neo_speed';
 
   var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
-  var map;
+  var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
-  var vectorSource;
   var allowXHR = true;
 
-  // Saisie de l'identifiant Radio
   var client = new $.es.Client({
     hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
     // apiVersion: '2.4'
   });
 
+  // Saisie de l'identifiant Radio
   function login(type) {
     var form = document.getElementById('myForm');
     var idRadio = form.idRadio.value;
@@ -120,7 +119,7 @@
   // Initialisation de la map, du bouton 'centrer la carte'
   // + Gestion des events (singleclick et moveend)
   function initMap() {
-    proj4.defs("EPSG:2154", "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+    proj4.defs("EPSG:2154", LAMBERT93);
     var point;
 
     client.search({
@@ -162,11 +161,18 @@
       vectorSource = new ol.source.Vector({});
 
       var freepik = new ol.Attribution({
-        html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+        html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
+              ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
+              ' is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"'+
+              ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
       });
 
       var plainicon = new ol.Attribution({
-        html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon" title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+        html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon"'+
+              ' title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com"'+
+              ' title="Flaticon">www.flaticon.com</a> is licensed by '+
+              '<a href="http://creativecommons.org/licenses/by/3.0/"'+
+              ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
       });
 
       map = new ol.Map({
@@ -243,9 +249,6 @@
       getLocation();
       // getFeaturesInMapExtent();
     });
-
-
-
   }
 
   // Initialisation du bouton permettant de recentrer la carte
@@ -328,7 +331,7 @@
     return doc;
   }
 
-  // Appel à l'API REST pour créer une nouvelle Feature
+  // Indexation d'un nouveau document dans ES
   function addFeature(accuracy, heading, speed, mapPoint) {
     var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
 
@@ -349,7 +352,7 @@
     });
   }
 
-  // Appel à l'API REST pour mettre a jour une Feature existante
+  // Mise a jour d'un document deja indexe dans ES
   function updateFeature(accuracy, heading, speed, mapPoint) {
     var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, Math.floor(Date.now() /1000));
 
@@ -392,8 +395,7 @@
   //   });
   // }
 
-  // Permet d'obtenir les limites(extent) de la carte en projection de lambert93
-  // dans le bon format pour effectuer une requete REST /query
+  // Permet d'obtenir les limites(extent) de la vue active de la carte en projection de lambert93
   function getMapExtent() {
     var e = map.getView().calculateExtent(map.getSize());
     var extent = {
