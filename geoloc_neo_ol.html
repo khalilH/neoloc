@@ -386,6 +386,7 @@
               var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
               var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
               console.log(mapPoint);
+              refreshId();
               if (objectId == null) {
                 addFeature(5, 0, 0, mapPoint);
               } else {
