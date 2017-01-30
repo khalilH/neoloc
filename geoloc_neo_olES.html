@@ -41,187 +41,187 @@
             </form>
           </div>
 
-        <li><a href="#">Export</a></li>
-        <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
-        <div class="row">
-          <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          <li><a href="#">Export</a></li>
+          <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
+          <div class="row">
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-        </div>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li onclick="toggle('loremDiv2')" ><a href="#">Lorem</a></li>
-        <div class="row">
-          <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv2">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          </div>
+          <li><a href="#">Analytics</a></li>
+          <li><a href="#">Export</a></li>
+          <li><a href="#">Analytics</a></li>
+          <li onclick="toggle('loremDiv2')" ><a href="#">Lorem</a></li>
+          <div class="row">
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv2">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-        </div>
-        <li><a href="#">Reports</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
-      </ul>
+          </div>
+          <li><a href="#">Reports</a></li>
+          <li><a href="#">Analytics</a></li>
+          <li><a href="#">Export</a></li>
+        </ul>
 
-    </div>
-    <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+      </div>
+      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
 
 
+      </div>
     </div>
   </div>
-</div>
 
-<div id="error" class="popup" style="display:none"></div>
-<div id="notification" class="popup" style="display:none"></div>
+  <div id="error" class="popup" style="display:none"></div>
+  <div id="notification" class="popup" style="display:none"></div>
 
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="openlayers/ol.js"></script>
-<script src="proj4js/dist/proj4-src.js"></script>
-<script src="jquery-3.1.1.min.js"></script>
-<script src="elasticsearch/elasticsearch.jquery.js"></script>
-<script src="bootstrap/js/bootstrap.min.js"></script>
-<script>
-const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
-const TILE_URL = BASE_URL + '/PP/FOND_PP_FINAL_512/MapServer';
-var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';
-const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="openlayers/ol.js"></script>
+  <script src="proj4js/dist/proj4-src.js"></script>
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="elasticsearch/elasticsearch.jquery.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script>
+  const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
+  const TILE_URL = BASE_URL + '/PP/FOND_PP_FINAL_512/MapServer';
+  var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';
+  const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
 
-const SECOND_IN_MILLIS = 1000;
-const MINUTE_IN_MILLIS = 60*SECOND_IN_MILLIS;
+  const SECOND_IN_MILLIS = 1000;
+  const MINUTE_IN_MILLIS = 60*SECOND_IN_MILLIS;
 
-const REFRESH_TIME = 6 * SECOND_IN_MILLIS;
+  const REFRESH_TIME = 6 * SECOND_IN_MILLIS;
 
-const EARTH_RADIUS = 6371.01;
+  const EARTH_RADIUS = 6371.01;
 
-const _E7 = Math.pow(10, 7);
-const RESOLUTIONS = [
-  1322.9193125052918,
-  529.1677250021168,
-  264.5838625010584,
-  185.20870375074085,
-  119.06273812547626,
-  92.60435187537043,
-  66.1459656252646,
-  39.687579375158755,
-  26.458386250105836,
-  13.229193125052918,
-  6.614596562526459,
-  2.6458386250105836,
-  1.3229193125052918,
-  0.7937515875031751,
-  0.26458386250105836,
-  0.13229193125052918,
-  0.06614596562526459
-]
+  const _E7 = Math.pow(10, 7);
+  const RESOLUTIONS = [
+    1322.9193125052918,
+    529.1677250021168,
+    264.5838625010584,
+    185.20870375074085,
+    119.06273812547626,
+    92.60435187537043,
+    66.1459656252646,
+    39.687579375158755,
+    26.458386250105836,
+    13.229193125052918,
+    6.614596562526459,
+    2.6458386250105836,
+    1.3229193125052918,
+    0.7937515875031751,
+    0.26458386250105836,
+    0.13229193125052918,
+    0.06614596562526459
+  ]
 
-const INDEX = 'neo';
-const TYPE = 'tests'
-const _ID = 'neo_id';
-const _X = 'neo_x';
-const _Y = 'neo_y';
-const _ACCURACY = 'neo_accur';
-const _TIMESTAMP = 'neo_timestamp';
-const _HEADING = 'neo_heading';
-const _SPEED = 'neo_speed';
+  const INDEX = 'neo';
+  const TYPE = 'tests'
+  const _ID = 'neo_id';
+  const _X = 'neo_x';
+  const _Y = 'neo_y';
+  const _ACCURACY = 'neo_accur';
+  const _TIMESTAMP = 'neo_timestamp';
+  const _HEADING = 'neo_heading';
+  const _SPEED = 'neo_speed';
 
-var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
-var map, vectorSource;
-var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
-var allowXHR = true;
-var isMenuVisible = true;
-var form = document.getElementById('myForm');;
-window.app = {};
-var app = window.app;
+  var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
+  var map, vectorSource;
+  var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
+  var allowXHR = true;
+  var isMenuVisible = true;
+  var form = document.getElementById('myForm');;
+  window.app = {};
+  var app = window.app;
 
-var client = new $.es.Client({
-  hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
-  // apiVersion: '2.4'
-});
-
-// Initialisation de la map, du bouton 'centrer la carte'
-// + Gestion des events (singleclick et moveend)
-function initMap() {
-  proj4.defs("EPSG:2154", LAMBERT93);
-
-  // Debut d'initialisation de l'objet map
-  var EPSG_2154 = new ol.proj.Projection({
-    code: 'EPSG:2154',
-    extent: [503514.6000000015, 6683176.3999999985, 849432.8, 6997025],
-    units: 'm'
+  var client = new $.es.Client({
+    hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
+    // apiVersion: '2.4'
   });
 
-  // import de la projection de lambert93 dans openlayers
-  ol.proj.addProjection(EPSG_2154);
+  // Initialisation de la map, du bouton 'centrer la carte'
+  // + Gestion des events (singleclick et moveend)
+  function initMap() {
+    proj4.defs("EPSG:2154", LAMBERT93);
 
-  var tileg = new ol.tilegrid.TileGrid({
-    origin: [-3.55975*_E7, 4.89531*_E7],
-    resolutions: RESOLUTIONS,
-    tileSize: 512
-  });
-
-  var point = proj4('EPSG:4326', LAMBERT93, [2.362765, 48.841291]);
-
-  vectorSource = new ol.source.Vector({});
-
-  var freepik = new ol.Attribution({
-    html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
-    ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
-    ' is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"'+
-    ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
-  });
-
-  var plainicon = new ol.Attribution({
-    html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon"'+
-    ' title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com"'+
-    ' title="Flaticon">www.flaticon.com</a> is licensed by '+
-    '<a href="http://creativecommons.org/licenses/by/3.0/"'+
-    ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
-  });
-
-  // Ajout des custom button
-  app.RecenterMap = function(opt_options) {
-    var options = opt_options || {};
-    var button = document.createElement('button');
-    button.innerHTML = '<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>';
-
-    var this_ = this;
-    var handleRecenterMap = function() {
-      recenterMap();
-    };
-    button.addEventListener('click', handleRecenterMap, false);
-
-    var element = document.createElement('div');
-    element.className = 'center ol-unselectable ol-control';
-    element.appendChild(button);
-
-    ol.control.Control.call(this, {
-      element: element,
-      target: options.target
+    // Debut d'initialisation de l'objet map
+    var EPSG_2154 = new ol.proj.Projection({
+      code: 'EPSG:2154',
+      extent: [503514.6000000015, 6683176.3999999985, 849432.8, 6997025],
+      units: 'm'
     });
 
-  };
-  app.ToggleMenu = function(opt_options) {
-    var options = opt_options || {};
-    var button = document.createElement('button');
-    button.innerHTML = '<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>';
+    // import de la projection de lambert93 dans openlayers
+    ol.proj.addProjection(EPSG_2154);
 
-    var this_ = this;
-    var handleToggleMenu = function() {
-      toggleMenu();
-    };
-    button.addEventListener('click', handleToggleMenu, false);
-
-    var element = document.createElement('div');
-    element.className = 'toggle ol-unselectable ol-control';
-    element.appendChild(button);
-
-    ol.control.Control.call(this, {
-      element: element,
-      target: options.target
+    var tileg = new ol.tilegrid.TileGrid({
+      origin: [-3.55975*_E7, 4.89531*_E7],
+      resolutions: RESOLUTIONS,
+      tileSize: 512
     });
 
-  };
-  ol.inherits(app.RecenterMap, ol.control.Control);
-  ol.inherits(app.ToggleMenu, ol.control.Control);
+    var point = proj4('EPSG:4326', LAMBERT93, [2.362765, 48.841291]);
+
+    vectorSource = new ol.source.Vector({});
+
+    var freepik = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
+      ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
+      ' is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"'+
+      ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
+    var plainicon = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon"'+
+      ' title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com"'+
+      ' title="Flaticon">www.flaticon.com</a> is licensed by '+
+      '<a href="http://creativecommons.org/licenses/by/3.0/"'+
+      ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
+    // Ajout des custom button
+    app.RecenterMap = function(opt_options) {
+      var options = opt_options || {};
+      var button = document.createElement('button');
+      button.innerHTML = '<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>';
+
+      var this_ = this;
+      var handleRecenterMap = function() {
+        recenterMap();
+      };
+      button.addEventListener('click', handleRecenterMap, false);
+
+      var element = document.createElement('div');
+      element.className = 'center ol-unselectable ol-control';
+      element.appendChild(button);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
+
+    };
+    app.ToggleMenu = function(opt_options) {
+      var options = opt_options || {};
+      var button = document.createElement('button');
+      button.innerHTML = '<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>';
+
+      var this_ = this;
+      var handleToggleMenu = function() {
+        toggleMenu();
+      };
+      button.addEventListener('click', handleToggleMenu, false);
+
+      var element = document.createElement('div');
+      element.className = 'toggle ol-unselectable ol-control';
+      element.appendChild(button);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
+
+    };
+    ol.inherits(app.RecenterMap, ol.control.Control);
+    ol.inherits(app.ToggleMenu, ol.control.Control);
 
     map = new ol.Map({
       controls: ol.control.defaults({
@@ -803,5 +803,5 @@ function initMap() {
   }
 
   </script>
-  </body>
-  </html>
+</body>
+</html>
