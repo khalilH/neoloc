@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>POC Geoloc - OL + ES</title>
+  <title>POC Geoloc</title>
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="geoloc_neo_olES.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
@@ -31,49 +31,51 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-sm-7 col-sm-offset-3 col-md-11 col-md-offset-1">
-                  <span><input type="radio" name="type" value="b_" checked><img src="images/bicycle.png" alt="vélo" class="imgButton"></span>
-                  <span><input type="radio" name="type" value="m_"><img src="images/bike.png" alt="moto" class="imgButton"></span>
-                  <span><input type="radio" name="type" value="c_"><img src="images/car.png" alt="voiture" class="imgButton"></span>
-                  <span><input type="radio" name="type" value="p_"><img src="images/policeman.png" alt="piéton" class="imgButton"></span>
+                <div class="col-xs-11 col-xs-offset-1 col-sm-7 col-sm-offset-3 col-md-11 col-md-offset-1">
+                  <span><input type="radio" name="type" value="bicycle" checked><img src="images/bicycle.png" alt="vélo" class="imgButton"></span>
+                  <span><input type="radio" name="type" value="bike"><img src="images/bike.png" alt="moto" class="imgButton"></span>
+                  <span><input type="radio" name="type" value="car"><img src="images/car.png" alt="voiture" class="imgButton"></span>
+                  <span><input type="radio" name="type" value="policeman"><img src="images/policeman.png" alt="piéton" class="imgButton"></span>
                 </div>
               </div>
             </form>
           </div>
 
           <li><a href="#">Export</a></li>
+
+          <!-- Exemple de sous-menu  -->
           <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
           <div class="row">
             <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
           </div>
+
           <li><a href="#">Analytics</a></li>
+
           <li><a href="#">Export</a></li>
+
           <li><a href="#">Analytics</a></li>
+
+          <!-- Exemple de sous-menu -->
           <li onclick="toggle('loremDiv2')" ><a href="#">Lorem</a></li>
           <div class="row">
             <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv2">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
           </div>
+
           <li><a href="#">Reports</a></li>
+
           <li><a href="#">Analytics</a></li>
+
           <li><a href="#">Export</a></li>
         </ul>
 
       </div>
-      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
-
-
-      </div>
+      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main"></div>
     </div>
   </div>
 
   <div id="error" class="popup" style="display:none"></div>
   <div id="notification" class="popup" style="display:none"></div>
 
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
   <script src="jquery-3.1.1.min.js"></script>
@@ -113,8 +115,9 @@
     0.06614596562526459
   ]
 
+  // Constantes elasticsearch
   const INDEX = 'neo';
-  const TYPE = 'tests'
+  const ES_TYPE = 'tests'
   const _ID = 'neo_id';
   const _X = 'neo_x';
   const _Y = 'neo_y';
@@ -122,8 +125,10 @@
   const _TIMESTAMP = 'neo_timestamp';
   const _HEADING = 'neo_heading';
   const _SPEED = 'neo_speed';
+  const _TYPE = 'neo_type';
 
-  var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
+  var objectId = null, isGPSReady = false, id, type;
+  // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
   var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
   var allowXHR = true;
@@ -137,7 +142,7 @@
     // apiVersion: '2.4'
   });
 
-  // Initialisation de la map, du bouton 'centrer la carte'
+  // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
@@ -177,7 +182,7 @@
       ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
     });
 
-    // Ajout des custom button
+    // Ajout des boutons personalises (centerMap + toggleMenu)
     app.RecenterMap = function(opt_options) {
       var options = opt_options || {};
       var button = document.createElement('button');
@@ -190,7 +195,7 @@
       button.addEventListener('click', handleRecenterMap, false);
 
       var element = document.createElement('div');
-      element.className = 'center ol-unselectable ol-control';
+      element.className = 'centerButton ol-unselectable ol-control';
       element.appendChild(button);
 
       ol.control.Control.call(this, {
@@ -266,7 +271,8 @@
       getFeaturesInMapExtent();
     });
 
-    initControls();
+    // Suppression de la class disabled (reste present apres un F5)
+    $('#goButton').removeAttr('disabled');
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
@@ -275,33 +281,54 @@
   // Permet d'ouvrir ou de fermer le volet du menu dont l'id du div est name
   function toggle(name) {
     if ($('#'+name)[0].hidden) {
-      $('#'+name).fadeIn(1000);
+      $('#'+name).fadeIn(500);
       $('#'+name)[0].hidden = false;
-      console.log("true");
     }
     else {
       $('#'+name).fadeOut(500);
       $('#'+name)[0].hidden = true;
-      console.log("false");
     }
   }
 
   // permet de mettre a jour le type et l'idRadio
   function refreshId() {
     var idRadio = form.idRadio.value;
-    var type = form.type.value;
-    if (idRadio != '0000' && idRadio != '' && type != '') {
-      id = type+idRadio;
+    var _type = form.type.value;
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
+      id = idRadio;
+      type = _type;
+    }
+  }
+
+  // Permet de mettre automatiquement a jour le type du vehicule sur le formulaire
+  function refreshInputRadio(neo_type) {
+    switch (neo_type) {
+      case "bycicle":
+        form.type[0].checked = true;
+      break;
+      case "bike":
+        form.type[1].checked = true;
+      break;
+      case "car":
+        form.type[2].checked = true;
+      break;
+      case "policeman":
+        form.type[3].checked = true;
+      break;
+      default:
+      console.error("je ne dois pas passer ici "+neo_type);
     }
   }
 
   // Saisie de l'identifiant Radio
   function login() {
     var idRadio = form.idRadio.value;
-    var type = form.type.value;
-    if (idRadio != '0000' && idRadio != '' && type != '') {
-      id = type+idRadio;
+    var _type = form.type.value;
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
+      id = idRadio;
+      type = _type;
       console.log(id);
+      console.log(type);
       $('#goButton').attr('disabled', 'disabled');
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
@@ -319,7 +346,7 @@
       var point;
       client.search({
         index: INDEX,
-        type: TYPE,
+        type: ES_TYPE,
         body: {
           query : { match : {"neo_id" : id }}
         }
@@ -333,6 +360,8 @@
           objectId = feature._id;
           console.log(objectId);
           point = [feature._source.neo_x, feature._source.neo_y];
+          neo_type = feature._source.neo_type;
+          refreshInputRadio(neo_type);
           sessionStorage.lastPosition = JSON.stringify(point);
           centerMap(point);
         }
@@ -363,6 +392,7 @@
                 updateFeature(5, 0, 0, mapPoint);
                 lastDateUpdate = Date.now();
               }
+              updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
               sessionStorage.lastPosition = JSON.stringify(coordinates);
             }
           }
@@ -375,14 +405,9 @@
     }
   }
 
-  // Lancement de l'application en mode user
+  // Lancement de l'application en mode salle de commandement
   function startAdminMode() {
 
-  }
-
-  // Initialisation du bouton permettant de recentrer la carte
-  function initControls() {
-    $('#goButton').removeAttr('disabled');
   }
 
   // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
@@ -463,9 +488,10 @@
     }
   }
 
-  function createDocument(id, x, y, accuracy, heading, speed, timestamp) {
+  function createDocument(id, type, x, y, accuracy, heading, speed, timestamp) {
     var doc = {};
     doc[_ID] = id;
+    doc[_TYPE] = type;
     doc[_X] = x;
     doc[_Y] = y;
     doc[_ACCURACY] = accuracy;
@@ -477,11 +503,11 @@
 
   // Indexation d'un nouveau document dans ES
   function addFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
 
     client.index({
       index: INDEX,
-      type: TYPE,
+      type: ES_TYPE,
       body: doc
     }, function (error, response) {
       if (error != undefined) {
@@ -498,11 +524,11 @@
 
   // Mise a jour d'un document deja indexe dans ES
   function updateFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, mapPoint.x, mapPoint.y, accuracy, Math.floor(Date.now() /1000));
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
 
     client.index({
       index: INDEX,
-      type: TYPE,
+      type: ES_TYPE,
       id: objectId,
       body: doc
     }, function (error, response) {
@@ -517,13 +543,28 @@
     });
   }
 
+  // Permet de mettre a jour localement la position et le type de ma feature
+  function updateLocalFeatureGeometry(x, y) {
+    var features = vectorSource.getFeatures();
+    var length = features.length;
+    for (var i = 0; i < length; i++) {
+      if (features[i].get('neo_id') == id) {
+        refreshId()
+        features[i].setGeometry(new ol.geom.Point([x, y]));
+        features[i].set('type', type);
+        vectorSource.refresh();
+        return;
+      }
+    }
+  }
+
+  // /!\ POUR INFO : deplacee dans la methode initMap car il y a du code a executer dans le callback /!\
   // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
   // si et seulement si j'existe deja
-  // deplacee dans la methode initMap car il y a du code a executer dans le callback
   // function getMyFeature() {
   //   client.search({
   //     index: INDEX,
-  //     type: TYPE,
+  //     type: ES_TYPE,
   //     body: {
   //       query : { match : {"neo_id" : id }}
   //     }
@@ -575,7 +616,6 @@
         } else {
           console.log(JSON.stringify(response.hits.hits.length));
           refresh(response.hits.hits);
-          // do something with results
           lastDateQuery = Date.now();
           if (allowXHR) {
             allowXHR = false;
@@ -591,7 +631,7 @@
   function refresh(hits) {
     refreshId();
     var i, length = hits.length;
-    // if (length == 0) return;
+    if (length == 0) return;
     console.log('refresh');
     vectorSource.clear();
     for (i = 0; i < length ; i++) {
@@ -603,36 +643,8 @@
       }
       if (feature._source.neo_accur > 24) {
         addCircle(feature, delta);
-        addMarker(feature, delta);
-      } else {
-        addMarker(feature, delta);
       }
-    }
-  }
-
-  // Permet de recuperer le prefixe de l'image .png a partir du 'type'
-  function getType(type) {
-    switch (type) {
-      case 'b_':
-      return 'bicycle';
-      break;
-      case 'm_':
-      return 'bike';
-      break;
-      case 'c_':
-      return 'car';
-      break;
-      case 'p_':
-      return 'policeman';
-      break;
-      case 'o_':
-      return 'office';
-      break;
-      case 'f_':
-      return 'boat';
-      break;
-      default:
-      console.error("getType : Je ne dois pas passer ici "+type);
+      addMarker(feature, delta);
     }
   }
 
@@ -709,7 +721,7 @@
     var zoom = map.getView().getZoom();
     var color = this.get('color');
     var suffixe = getColor(color);
-    var type = getType(this.get('type'));
+    var type = this.get('type');
 
     return [
       new ol.style.Style({
@@ -760,10 +772,12 @@
     var neo_id = feature._source.neo_id;
     var x = feature._source.neo_x;
     var y = feature._source.neo_y;
+    var neo_type = feature._source.neo_type;
     var point = new ol.geom.Point([x, y]);
     var feat = new ol.Feature({geometry: point});
     if (neo_id == id) {
       feat.set('color', 'red');
+      refreshInputRadio(neo_type);
     } else {
       if (delta > 5 * MINUTE_IN_MILLIS) {
         feat.set('color', 'blue');
@@ -771,8 +785,8 @@
         feat.set('color', 'green');
       }
     }
-    feat.set('neo_id', neo_id.slice(2));
-    feat.set('type', neo_id.substring(0,2));
+    feat.set('neo_id', neo_id);
+    feat.set('type', neo_type);
     feat.setStyle(markerStyle);
     vectorSource.addFeature(feat);
   }
@@ -800,6 +814,13 @@
   function showError(message) {
     document.getElementById('error').innerHTML = message;
     $('#error').fadeIn(400).delay(2000).fadeOut(400);
+  }
+
+  function debugNotif() {
+    document.getElementById('notification').innerHTML = 'geolocalisation en cours, cliquez sur la carte pour indiquer votre position';
+    document.getElementById('error').innerHTML = 'Perte de connexion';
+    $('#notification').fadeIn(500);
+    $('#error').fadeIn(500);
   }
 
   </script>
