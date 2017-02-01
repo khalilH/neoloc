@@ -7,7 +7,10 @@
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
-
+  <link rel="stylesheet" href="datepicker/bootstrap-datetimepicker.min.css">
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="moment.js"></script>
+  <script src="datepicker/bootstrap-datetimepicker.min.js"></script>
 </head>
 <body>
 
@@ -53,7 +56,25 @@
             </form>
           </div>
 
-          <li><a href="#">Export</a></li>
+          <!-- Date et heure de fin de vacation -->
+          <li onclick="toggle('datetimepickerDiv')"><a href="#">Fin de vacation</a></li>
+            <div id="datetimepickerDiv" class="row">
+              <div class='col-xs-8 col-xs-offset-2 col-sm-12 col-sm-offset-0 col-md-8 col-md-offset-2'>
+                <div class="form-group">
+                  <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control" />
+                    <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <script type="text/javascript">
+              $(function () {
+                $('#datetimepicker1').datetimepicker();
+              });
+              </script>
+          </div>
 
           <!-- Exemple de sous-menu  -->
           <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
@@ -90,9 +111,9 @@
 
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
-  <script src="jquery-3.1.1.min.js"></script>
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+
   <script>
   const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
   const TILE_URL = BASE_URL + '/PP/FOND_PP_FINAL_512/MapServer';
@@ -316,16 +337,16 @@
   function refreshInputRadio(neo_type) {
     switch (neo_type) {
       case "bycicle":
-        form.type[0].checked = true;
+      form.type[0].checked = true;
       break;
       case "bike":
-        form.type[1].checked = true;
+      form.type[1].checked = true;
       break;
       case "car":
-        form.type[2].checked = true;
+      form.type[2].checked = true;
       break;
       case "policeman":
-        form.type[3].checked = true;
+      form.type[3].checked = true;
       break;
       default:
       console.error("je ne dois pas passer ici "+neo_type);
