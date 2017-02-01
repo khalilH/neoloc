@@ -8,9 +8,6 @@
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
   <link rel="stylesheet" href="datepicker/bootstrap-datetimepicker.min.css">
-  <script src="jquery-3.1.1.min.js"></script>
-  <script src="moment.js"></script>
-  <script src="datepicker/bootstrap-datetimepicker.min.js"></script>
 </head>
 <body>
 
@@ -24,7 +21,7 @@
           <div id="idDiv" >
             <form id="myForm" onsubmit="return false;">
               <div class="row">
-                <div class="col-xs-6 col-xs-offset-3 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1">
                   <div id="idInputDiv" class="input-group">
                     <input type="text" class="form-control" name="idRadio" placeholder="Id radio">
                     <span class="input-group-btn">
@@ -34,9 +31,19 @@
                 </div>
               </div>
               <div class="row">
+                <div class='col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1'>
+                  <div class="form-group">
+                    <div class='input-group date' id='datetimepicker1'>
+                      <input id="finVacation" type='text' placeholder="Date/Heure fin de vacation" class="form-control"/>
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
                   <label class="radio-inline">
-                    <input type="radio" name="type" value="bicycle">
+                    <input type="radio" name="type" value="bicycle" checked>
                     <img src="images/bicycle.png" alt="vélo" class="imgButton">
                   </label>
                   <label class="radio-inline">
@@ -54,26 +61,6 @@
                 </div>
               </div>
             </form>
-          </div>
-
-          <!-- Date et heure de fin de vacation -->
-          <li onclick="toggle('datetimepickerDiv')"><a href="#">Fin de vacation</a></li>
-            <div id="datetimepickerDiv" class="row">
-              <div class='col-xs-8 col-xs-offset-2 col-sm-12 col-sm-offset-0 col-md-8 col-md-offset-2'>
-                <div class="form-group">
-                  <div class='input-group date' id='datetimepicker1'>
-                    <input type='text' class="form-control" />
-                    <span class="input-group-addon">
-                      <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <script type="text/javascript">
-              $(function () {
-                $('#datetimepicker1').datetimepicker();
-              });
-              </script>
           </div>
 
           <!-- Exemple de sous-menu  -->
@@ -111,8 +98,12 @@
 
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
+  <script src="jquery-3.1.1.min.js"></script>
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="moment.min.js"></script>
+  <script src="datepicker/bootstrap-datetimepicker.min.js"></script>
+  <script src="datepicker/fr.js"></script>
 
   <script>
   const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
@@ -159,8 +150,9 @@
   const _HEADING = 'neo_heading';
   const _SPEED = 'neo_speed';
   const _TYPE = 'neo_type';
+  const _FIN_VACATION = 'neo_finVacation'
 
-  var objectId = null, isGPSReady = false, id, type;
+  var objectId = null, isGPSReady = false, id, type, dateFinVacation;
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
   var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
@@ -306,6 +298,15 @@
 
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
+    // Initialisation du datetimepicker avec les bonnes options
+    $('#datetimepicker1').datetimepicker({
+      locale: 'fr',
+      stepping: 5,
+      focusOnShow: false,
+      showTodayButton: true,
+      showClose: true,
+      toolbarPlacement: 'top',
+    });
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
@@ -327,9 +328,11 @@
   function refreshId() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
-    if (idRadio != '0000' && idRadio != '' && _type != '') {
+    var _date = document.getElementById('finVacation').value;
+    if (idRadio != '0000' && idRadio != '' && _type != '' && _date != '') {
       id = idRadio;
       type = _type;
+      dateFinVacation = _date;
     }
   }
 
@@ -357,18 +360,21 @@
   function login() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
-    if (idRadio != '0000' && idRadio != '' && _type != '') {
+    var _date = document.getElementById('finVacation').value;
+    if (idRadio != '0000' && idRadio != '' && _type != '' && _date != '') {
       id = idRadio;
       type = _type;
+      dateFinVacation = _date;
       console.log(id);
       console.log(type);
+      console.log(dateFinVacation);
       $('#goButton').attr('disabled', 'disabled');
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
       $('#goButton').addClass('btn-danger');
       startUserMode();
     } else {
-      showError('identifiant inconnu');
+      showError('Saisie invalide');
     }
   }
 
@@ -526,6 +532,7 @@
     var doc = {};
     doc[_ID] = id;
     doc[_TYPE] = type;
+    doc[_FIN_VACATION] = dateFinVacation;
     doc[_X] = x;
     doc[_Y] = y;
     doc[_ACCURACY] = accuracy;
@@ -811,7 +818,6 @@
     var feat = new ol.Feature({geometry: point});
     if (neo_id == id) {
       feat.set('color', 'red');
-      refreshInputRadio(neo_type);
     } else {
       if (delta > 5 * MINUTE_IN_MILLIS) {
         feat.set('color', 'blue');
