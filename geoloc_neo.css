@@ -31,8 +31,6 @@ html, body {
   border: 2px solid #ddd;
   background-color: skyblue;
   border-radius: 10px;
-  margin-right: 10px;
-  margin-left: 10px;
   margin-bottom: 5px;
 }
 
@@ -173,4 +171,8 @@ input, textarea {
     top: 7px;
     left: 5.5em;
   }
+}
+
+#myForm {
+  text-align: center;
 }
