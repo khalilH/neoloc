@@ -152,7 +152,7 @@
   const _TYPE = 'neo_type';
   const _FIN_VACATION = 'neo_fin'
 
-  var objectId = null, isGPSReady = false, id, type, dateFinVacation;
+  var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
   var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
@@ -331,10 +331,16 @@
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     var _date = document.getElementById('finVacation').value;
-    if (idRadio != '0000' && idRadio != '' && _type != '' && _date != '') {
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
       id = idRadio;
       type = _type;
-      dateFinVacation = _date;
+      if (_date != '') {
+        var tmp = new Date(_date);
+        dateFinVacation = tmp.getTime();
+      }
+      else {
+        dateFinVacation = 0;
+      }
     }
   }
 
@@ -363,14 +369,16 @@
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     var _date = document.getElementById('finVacation').value;
-    if (idRadio != '0000' && idRadio != '' && _type != '' && _date != '') {
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
       id = idRadio;
       type = _type;
-      var tmp = new Date(_date);
-      dateFinVacation = tmp.getTime();
-      console.log(id);
-      console.log(type);
-      console.log(dateFinVacation);
+      if (_date != '') {
+        var tmp = new Date(_date);
+        dateFinVacation = tmp.getTime();
+      }
+      else {
+        dateFinVacation = 0;
+      }
       $('#goButton').attr('disabled', 'disabled');
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
@@ -535,7 +543,9 @@
     var doc = {};
     doc[_ID] = id;
     doc[_TYPE] = type;
-    doc[_FIN_VACATION] = dateFinVacation;
+    if (dateFinVacation != 0) {
+      doc[_FIN_VACATION] = dateFinVacation;
+    }
     doc[_X] = x;
     doc[_Y] = y;
     doc[_ACCURACY] = accuracy;
