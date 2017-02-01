@@ -667,6 +667,9 @@
       }, function(error, response) {
         if (error != undefined) {
           console.error(error);
+          if (error.status == 408) {
+            showError("Perte de connexion")
+          }
         } else {
           console.log(JSON.stringify(response.hits.hits.length));
           refresh(response.hits.hits);
