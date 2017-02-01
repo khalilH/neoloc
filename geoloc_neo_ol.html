@@ -662,7 +662,7 @@
             }
           }
         },
-        timeout: '5s',
+        requestTimeout: 5 * SECOND_IN_MILLIS,
         size: 1000
       }, function(error, response) {
         if (error != undefined) {
