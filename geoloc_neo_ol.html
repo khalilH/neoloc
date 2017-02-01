@@ -150,7 +150,7 @@
   const _HEADING = 'neo_heading';
   const _SPEED = 'neo_speed';
   const _TYPE = 'neo_type';
-  const _FIN_VACATION = 'neo_finVacation'
+  const _FIN_VACATION = 'neo_fin'
 
   var objectId = null, isGPSReady = false, id, type, dateFinVacation;
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
@@ -301,11 +301,13 @@
     // Initialisation du datetimepicker avec les bonnes options
     $('#datetimepicker1').datetimepicker({
       locale: 'fr',
-      stepping: 5,
+      // stepping: 5,
       focusOnShow: false,
       showTodayButton: true,
       showClose: true,
       toolbarPlacement: 'top',
+      format: 'MM/DD/YYYY HH:mm',
+      minDate: new Date()
     });
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
@@ -324,7 +326,7 @@
     }
   }
 
-  // permet de mettre a jour le type et l'idRadio
+  // permet de mettre a jour le type, l'idRadio ete la date/heure de fin de vacation
   function refreshId() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
@@ -364,7 +366,8 @@
     if (idRadio != '0000' && idRadio != '' && _type != '' && _date != '') {
       id = idRadio;
       type = _type;
-      dateFinVacation = _date;
+      var tmp = new Date(_date);
+      dateFinVacation = tmp.getTime();
       console.log(id);
       console.log(type);
       console.log(dateFinVacation);
@@ -544,7 +547,7 @@
 
   // Indexation d'un nouveau document dans ES
   function addFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
     client.index({
       index: INDEX,
@@ -565,7 +568,7 @@
 
   // Mise a jour d'un document deja indexe dans ES
   function updateFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Math.floor(Date.now() /1000));
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
     client.index({
       index: INDEX,
@@ -677,7 +680,7 @@
     vectorSource.clear();
     for (i = 0; i < length ; i++) {
       var feature = hits[i];
-      var timestamp = feature._source.neo_timestamp * 1000;
+      var timestamp = feature._source.neo_timestamp;
       var delta = Date.now() - timestamp;
       if (delta > 60*6 * MINUTE_IN_MILLIS) {
         continue;
