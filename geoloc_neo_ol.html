@@ -28,6 +28,7 @@
                       <button id="goButton" class="btn btn-info active" type="button" onclick="login()">Go</button>
                     </span>
                   </div>
+                  <span id="idError" class="label label-danger" style="display:none;"></span>
                 </div>
               </div>
               <div class="row">
@@ -77,6 +78,8 @@
               </div>
               <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1">
                 <textarea class="form-control" rows="3" name="evtDescription" placeholder="Description"></textarea>
+                <span id="evtError" class="label label-danger" style="display:none;">Titre non indiqué</span>
+                <span id="evtSuccess" class="label label-success" style="display:none;">Évènement crée</span>
               </div>
             </form>
           </div>
@@ -428,7 +431,7 @@
       $('#goButton').addClass('btn-danger');
       startUserMode();
     } else {
-      showError('Saisie invalide');
+      showError('Identifiant radio non indiqué', 'idError');
     }
   }
 
@@ -904,9 +907,14 @@
   }
 
   // MESSAGES DE NOTIFICATION ET D'ERREUR
-  function showNotification(message) {
-    document.getElementById('notification').innerHTML = message;
-    $('#notification').fadeIn(400).delay(1500).fadeOut(400);
+  function showNotification(message, labelId) {
+    if (labelId != undefined) {
+      document.getElementById(labelId).innerHTML = message;
+      $('#'+labelId).fadeIn(400).delay(1000).fadeOut(400);
+    } else {
+      document.getElementById('notification').innerHTML = message;
+      $('#notification').fadeIn(400).delay(1500).fadeOut(400);
+    }
   }
 
   function openNotification(message) {
@@ -918,9 +926,14 @@
     $('#notification').fadeOut(200);
   }
 
-  function showError(message) {
-    document.getElementById('error').innerHTML = message;
-    $('#error').fadeIn(400).delay(2000).fadeOut(400);
+  function showError(message, labelId) {
+    if(labelId != undefined) {
+      document.getElementById(labelId).innerHTML = message;
+      $('#'+labelId).fadeIn(400).delay(1000).fadeOut(400);
+    } else {
+      document.getElementById('error').innerHTML = message;
+      $('#error').fadeIn(400).delay(2000).fadeOut(400);
+    }
   }
 
   function debugNotif() {
@@ -941,12 +954,12 @@
         doc.description = description;
       }
       console.log(doc);
-      toggle('evenementDiv');
-      showNotification('Evenement "'+titre+'" crée');
+      showNotification('Évènement '+titre+' crée', 'evtSuccess');
+      // toggle('evenementDiv');
       form.evtTitre.value = '';
       form.evtDescription.value = '';
     } else {
-      showError('Saisie non complète')
+      showError('Titre non indiqué', 'evtError')
     }
   }
 
