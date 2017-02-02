@@ -107,7 +107,11 @@
         </ul>
 
       </div>
-      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main"></div>
+      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+        <span id="firefox-missing"  style="display:none" class="label label-danger">
+          Votre navigateur n'est pas supporté.<br> Cette application nécessite le navigateur Firefox
+        </span>
+      </div>
     </div>
   </div>
 
@@ -320,9 +324,15 @@
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
+  // Test du navigateur
+  var regexp = /Firefox/;
+  if (!regexp.test(navigator.userAgent)) {
+    document.getElementById('firefox-missing').style.display = "block";
+  } else {
   initMap();
+}
 
-// permet d'activer ou non le focus lorsque l'utilisateur veut rentrer une date
+  // permet d'activer ou non le focus lorsque l'utilisateur veut rentrer une date
   function initDateTimePicker() {
     // code specifique au S5 (height > 640), attention en cas de changement de materiel
     if (screen.height > 640) {

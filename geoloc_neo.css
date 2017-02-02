@@ -198,3 +198,7 @@ input, textarea {
 #myForm {
   text-align: center;
 }
+
+.firefox-missing {
+  font-size: 6em;
+}
