@@ -22,7 +22,7 @@ html, body {
   background-color: #EA4335;
 }
 
-#idInputDiv {
+.input-group{
   margin-bottom: 10px;
 }
 
