@@ -316,21 +316,36 @@
 
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
-    // Initialisation du datetimepicker avec les bonnes options
-    $('#datetimepicker1').datetimepicker({
-      locale: 'fr',
-      // stepping: 5,
-      // focusOnShow: false,
-      showTodayButton: true,
-      showClose: true,
-      toolbarPlacement: 'top',
-      format: 'MM/DD/YYYY HH:mm',
-      minDate: new Date()
-    });
+    initDateTimePicker();
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
   initMap();
+
+// permet d'activer ou non le focus lorsque l'utilisateur veut rentrer une date
+  function initDateTimePicker() {
+    // code specifique au S5 (height > 640), attention en cas de changement de materiel
+    if (screen.height > 640) {
+      $('#datetimepicker1').datetimepicker({
+        locale: 'fr',
+        focusOnShow: false,
+        showTodayButton: true,
+        showClose: true,
+        toolbarPlacement: 'top',
+        format: 'MM/DD/YYYY HH:mm',
+        minDate: new Date()
+      });
+    } else {
+      $('#datetimepicker1').datetimepicker({
+        locale: 'fr',
+        showTodayButton: true,
+        showClose: true,
+        toolbarPlacement: 'top',
+        format: 'MM/DD/YYYY HH:mm',
+        minDate: new Date()
+      });
+    }
+  }
 
   // Permet d'ouvrir ou de fermer le volet du menu dont l'id du div est name
   function toggle(name) {
