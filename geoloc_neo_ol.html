@@ -482,11 +482,19 @@
               refreshId();
               if (objectId == null) {
                 addFeature(5, 0, 0, mapPoint);
+                var point = new ol.geom.Point([mapPoint.x, mapPoint.y]);
+                var feat = new ol.Feature({geometry: point});
+                feat.set('color', 'red');
+                feat.set('neo_id', id);
+                feat.set('type', type);
+                feat.setStyle(markerStyle);
+                vectorSource.addFeature(feat);
+                vectorSource.refresh();
               } else {
                 updateFeature(5, 0, 0, mapPoint);
+                updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
                 lastDateUpdate = Date.now();
               }
-              updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
               sessionStorage.lastPosition = JSON.stringify(coordinates);
             }
           }
