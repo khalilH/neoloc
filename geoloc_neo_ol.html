@@ -72,14 +72,15 @@
                 <div class="input-group">
                   <input type="text" class="form-control" name="evtTitre" placeholder="Titre">
                   <span class="input-group-btn">
-                    <button class="btn btn-info" type="button" onclick="addEvent()">Créer</button>
+                    <button class="btn btn-info" type="button" onclick="handleCreateEvent()">Créer</button>
                   </span>
                 </div>
               </div>
               <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1">
                 <textarea class="form-control" rows="3" name="evtDescription" placeholder="Description"></textarea>
-                <span id="evtError" class="label label-danger" style="display:none;">Titre non indiqué</span>
-                <span id="evtSuccess" class="label label-success" style="display:none;">Évènement crée</span>
+                <span id="evtError" class="label label-danger" style="display:none;"></span>
+                <span id="evtSuccess" class="label label-success" style="display:none;"></span>
+                <span id="evtInfo" class="label label-info" style="display:none;"></span>
               </div>
             </form>
           </div>
@@ -164,18 +165,29 @@
     0.06614596562526459
   ]
 
-  // Constantes elasticsearch
+  // Indexs Elasticsearch
   const INDEX = 'neo';
-  const ES_TYPE = 'tests'
-  const _ID = 'neo_id';
-  const _X = 'neo_x';
-  const _Y = 'neo_y';
-  const _ACCURACY = 'neo_accur';
-  const _TIMESTAMP = 'neo_timestamp';
-  const _HEADING = 'neo_heading';
-  const _SPEED = 'neo_speed';
-  const _TYPE = 'neo_type';
-  const _FIN_VACATION = 'neo_fin'
+
+  // Types Elasticsearch
+  const NEO_TYPE = 'tests'
+  const EVENT_TYPE = 'events'
+
+  // Attributs Elasticsearch
+  const _NEO_ID = 'neo_id';
+  const _NEO_X = 'neo_x';
+  const _NEO_Y = 'neo_y';
+  const _NEO_ACCURACY = 'neo_accur';
+  const _NEO_TIMESTAMP = 'neo_timestamp';
+  const _NEO_HEADING = 'neo_heading';
+  const _NEO_SPEED = 'neo_speed';
+  const _NEO_TYPE = 'neo_type';
+  const _NEO_FIN_VACATION = 'neo_fin'
+
+  const _EVENT_TITRE = 'evt_titre';
+  const _EVENT_X = 'evt_x';
+  const _EVENT_Y = 'evt_y';
+  const _EVENT_AUTHOR = 'evt_author';
+  const _EVENT_DESCRIPTION = 'evt_description';
 
   var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
@@ -187,9 +199,9 @@
   window.app = {};
   var app = window.app;
 
+  // Creation connexion elasticsearch
   var client = new $.es.Client({
     hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
-    // apiVersion: '2.4'
   });
 
   // Initialisation de la map, des boutons (center + menu)
@@ -442,7 +454,7 @@
       var point;
       client.search({
         index: INDEX,
-        type: ES_TYPE,
+        type: NEO_TYPE,
         body: {
           query : { match : {"neo_id" : id }}
         }
@@ -485,19 +497,11 @@
               refreshId();
               if (objectId == null) {
                 addFeature(5, 0, 0, mapPoint);
-                var point = new ol.geom.Point([mapPoint.x, mapPoint.y]);
-                var feat = new ol.Feature({geometry: point});
-                feat.set('color', 'red');
-                feat.set('neo_id', id);
-                feat.set('type', type);
-                feat.setStyle(markerStyle);
-                vectorSource.addFeature(feat);
-                vectorSource.refresh();
               } else {
                 updateFeature(5, 0, 0, mapPoint);
-                updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
                 lastDateUpdate = Date.now();
               }
+              updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
               sessionStorage.lastPosition = JSON.stringify(coordinates);
             }
           }
@@ -531,7 +535,7 @@
     }
   }
 
-  // Methode appelée a chaque modification de la vue de la map
+  // Methode appelée pour recentrer la carte sur la derniere position connue
   function recenterMap() {
     console.log("recenter");
     var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
@@ -562,7 +566,7 @@
     );
   }
 
-  // Met a jour la position sur la couche portal NEO si et seulement si la derniere
+  // Met a jour la position dans l'index ES si et seulement si la derniere
   // mise a jour n'a pas eu lieu dans les 5 dernieres secondes
   function updatePosition(coords) {
     var lat = coords.latitude, lng = coords.longitude, accuracy = coords.accuracy,
@@ -593,29 +597,30 @@
     }
   }
 
+  // Cree un document representant la position d'un utilisateur
   function createDocument(id, type, x, y, accuracy, heading, speed, timestamp) {
     var doc = {};
-    doc[_ID] = id;
-    doc[_TYPE] = type;
+    doc[_NEO_ID] = id;
+    doc[_NEO_TYPE] = type;
     if (dateFinVacation != 0) {
-      doc[_FIN_VACATION] = dateFinVacation;
+      doc[_NEO_FIN_VACATION] = dateFinVacation;
     }
-    doc[_X] = x;
-    doc[_Y] = y;
-    doc[_ACCURACY] = accuracy;
-    doc[_TIMESTAMP] = timestamp;
-    doc[_HEADING] = heading;
-    doc[_SPEED] = speed;
+    doc[_NEO_X] = x;
+    doc[_NEO_Y] = y;
+    doc[_NEO_ACCURACY] = accuracy;
+    doc[_NEO_TIMESTAMP] = timestamp;
+    doc[_NEO_HEADING] = heading;
+    doc[_NEO_SPEED] = speed;
     return doc;
   }
 
-  // Indexation d'un nouveau document dans ES
+  // Indexation d'un nouveau document(position) dans ES
   function addFeature(accuracy, heading, speed, mapPoint) {
     var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
     client.index({
       index: INDEX,
-      type: ES_TYPE,
+      type: NEO_TYPE,
       body: doc
     }, function (error, response) {
       if (error != undefined) {
@@ -630,13 +635,13 @@
     });
   }
 
-  // Mise a jour d'un document deja indexe dans ES
+  // Mise a jour d'un document(position) deja indexe dans ES
   function updateFeature(accuracy, heading, speed, mapPoint) {
     var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
     client.index({
       index: INDEX,
-      type: ES_TYPE,
+      type: NEO_TYPE,
       id: objectId,
       body: doc
     }, function (error, response) {
@@ -664,6 +669,14 @@
         return;
       }
     }
+    var point = new ol.geom.Point([x, y]);
+    var feat = new ol.Feature({geometry: point});
+    feat.set('color', 'red');
+    feat.set('neo_id', id);
+    feat.set('type', type);
+    feat.setStyle(markerStyle);
+    vectorSource.addFeature(feat);
+    vectorSource.refresh();
   }
 
   // /!\ POUR INFO : deplacee dans la methode initMap car il y a du code a executer dans le callback /!\
@@ -738,7 +751,7 @@
     }
   }
 
-  // Permet de mettre a jour l'affichage des features
+  // Permet de mettre a jour l'affichage des positions sur la carte
   function refresh(hits) {
     refreshId();
     var i, length = hits.length;
@@ -910,7 +923,7 @@
   function showNotification(message, labelId) {
     if (labelId != undefined) {
       document.getElementById(labelId).innerHTML = message;
-      $('#'+labelId).fadeIn(400).delay(1000).fadeOut(400);
+      $('#'+labelId).fadeIn(400).delay(1500).fadeOut(400);
     } else {
       document.getElementById('notification').innerHTML = message;
       $('#notification').fadeIn(400).delay(1500).fadeOut(400);
@@ -929,7 +942,7 @@
   function showError(message, labelId) {
     if(labelId != undefined) {
       document.getElementById(labelId).innerHTML = message;
-      $('#'+labelId).fadeIn(400).delay(1000).fadeOut(400);
+      $('#'+labelId).fadeIn(400).delay(1500).fadeOut(400);
     } else {
       document.getElementById('error').innerHTML = message;
       $('#error').fadeIn(400).delay(2000).fadeOut(400);
@@ -943,23 +956,52 @@
     $('#error').fadeIn(500);
   }
 
-  function addEvent() {
+  // handler du clic sur le bouton creer un evenement
+  function handleCreateEvent() {
     var form = document.getElementById('evenementForm')
     var titre = form.evtTitre.value;
     var description = form.evtDescription.value;
     if (titre != '') {
-      var doc = {};
-      doc.titre = titre;
-      if (description != '') {
-        doc.description = description;
-      }
-      console.log(doc);
-      showNotification('Évènement '+titre+' crée', 'evtSuccess');
-      // toggle('evenementDiv');
-      form.evtTitre.value = '';
-      form.evtDescription.value = '';
+      addEvent(titre, description)
     } else {
       showError('Titre non indiqué', 'evtError')
+    }
+  }
+
+  // ajout d'un evenement dans ES si cela est possible
+  function addEvent(titre, description) {
+    if (id == undefined) {
+      showError('Connexion requise', 'idError');
+      return;
+    }
+
+    if (sessionStorage.lastPosition != undefined || isGPSReady) {
+      var docEvent = {};
+      docEvent[_EVENT_TITRE] = titre;
+      var pos = JSON.parse(sessionStorage.lastPosition);
+      docEvent[_EVENT_X] = pos[0];
+      docEvent[_EVENT_Y] = pos[1];
+      docEvent[_EVENT_AUTHOR] = id;
+      if (description != '') {
+        docEvent[_EVENT_DESCRIPTION] = description;
+      }
+      client.index({
+        index: INDEX,
+        type: EVENT_TYPE,
+        body: docEvent
+      }, function (error, response) {
+        if (error != undefined) {
+          console.error(error);
+        } else {
+          console.log(response);
+          showNotification('Évènement '+titre+' créé', 'evtSuccess');
+          var form = document.getElementById('evenementForm')
+          form.evtTitre.value = '';
+          form.evtDescription.value = '';
+        }
+      });
+    } else {
+        showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
     }
   }
 
