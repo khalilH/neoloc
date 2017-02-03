@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
   <link rel="stylesheet" href="datepicker/bootstrap-datetimepicker.min.css">
+  
+	  
 </head>
 <body>
 
@@ -121,7 +123,9 @@
 
   <div id="error" class="popup" style="display:none"></div>
   <div id="notification" class="popup" style="display:none"></div>
-
+  
+  <script src="config.js"></script>
+  
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
   <script src="jquery-3.1.1.min.js"></script>
@@ -134,7 +138,9 @@
   <script>
   const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/esri';
   const TILE_URL = BASE_URL + '/server/rest/services/PP/FOND_PP_FINAL_512/MapServer';
-  var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';
+  //var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';  
+  var URL_TEMPLATE = NEOCONFIG.mapServer.template;
+
   const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
 
   const SECOND_IN_MILLIS = 1000;
