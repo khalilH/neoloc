@@ -223,27 +223,6 @@
     });
   }
 
-  // Mise a jour d'un document(position) deja indexe dans ES
-  function updateFeature(accuracy, heading, speed, mapPoint) {
-    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
-
-    client.index({
-      index: INDEX,
-      type: NEO_TYPE,
-      id: objectId,
-      body: doc
-    }, function (error, response) {
-      if (error != undefined) {
-        console.error(error);
-      } else {
-        console.log(response);
-        if (!allowXHR) {
-          allowXHR = true;
-        }
-      }
-    });
-  }
-
   // Permet de mettre a jour localement la position et le type de ma feature
   function updateLocalFeatureGeometry(x, y) {
     var features = vectorSource.getFeatures();

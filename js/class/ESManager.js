@@ -6,7 +6,7 @@ var ESManager = function (host)
 };
 
 /**
- * retourne les features
+ * cherche les elements et execute le callback
  */
 ESManager.prototype.searchExec = function (searchParams, onSuccess, onError)
 {	
@@ -23,4 +23,20 @@ ESManager.prototype.searchExec = function (searchParams, onSuccess, onError)
 	        }
 	      });
 	
+};
+
+ESManager.prototype.indexExec = function (indexParams, onSuccess, onError)
+{	
+
+	      this.client.index(indexParams, function(error, response) {
+	        if (error != undefined) {	        	
+	          console.error(error);
+	          if (error.status == 408) {
+	            showError("Perte de connexion");
+	            return false;
+	          }
+	        } else {
+	          onSuccess(response, error);
+	        }
+	      });	      	
 };

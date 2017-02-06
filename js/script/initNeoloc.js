@@ -70,7 +70,7 @@
 
   var es = new ESManager(NEOCONFIG.es.host, NEOCONFIG.es.index);
   var omap = new Map();
-  var ofeature = new FeatureManager();
+  var ofeature = new FeatureManager(es);
 
 
 

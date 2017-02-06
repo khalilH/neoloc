@@ -143,7 +143,7 @@
       var point;
       
       //recuperer le filtre de recherche
-      var searchParams = ofeature.getFeature(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, id);
+      var searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, id);
       
       var onSuccess = function(response, error){
           if (error != undefined) {
@@ -185,7 +185,8 @@
                   if (objectId == null) {
                     addFeature(5, 0, 0, mapPoint);
                   } else {
-                    updateFeature(5, 0, 0, mapPoint);
+                	  ofeature.update(id, type, objectId, NEOCONFIG.es.index, NEOCONFIG.es.type.neo, 5, 0, 0, mapPoint);
+                	  //updateFeature(5, 0, 0, mapPoint);
                     lastDateUpdate = Date.now();
                   }
                   updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
