@@ -100,72 +100,7 @@
     }
   }
 
-  // Lancement de l'application en mode user
-  function startUserMode() {
-    if (navigator.geolocation) {
-      openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
-      var point;
-      client.search({
-        index: INDEX,
-        type: NEO_TYPE,
-        body: {
-          query : { match : {"neo_id" : id }}
-        }
-      }, function(error, response) {
-        if (error != undefined) {
-          console.error(error);
-        } else if (response.hits.total == 0) {
-          console.log(id+' non present dans la base');
-        } else {
-          var feature = response.hits.hits[0];
-          objectId = feature._id;
-          console.log(objectId);
-          point = [feature._source.neo_x, feature._source.neo_y];
-          neo_type = feature._source.neo_type;
-          refreshInputRadio(neo_type);
-          sessionStorage.lastPosition = JSON.stringify(point);
-          centerMap(point);
-        }
 
-        // Gestion du click simple sur la carte pour l'initialisation manuelle
-        // de sa position en attente du fix GPS
-        var mapDiv = document.getElementById('map');
-        var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
-
-        mapDiv.addEventListener('mousedown', function(event) {
-          console.log(event);
-          mousedown_x = event.layerX;
-          mousedown_y = event.layerY;
-        });
-
-        mapDiv.addEventListener('mouseup', function(event) {
-          mouseup_x = event.layerX;
-          mouseup_y = event.layerY;
-
-          if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
-            if(!isGPSReady) {
-              var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
-              var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
-              console.log(mapPoint);
-              refreshId();
-              if (objectId == null) {
-                addFeature(5, 0, 0, mapPoint);
-              } else {
-                updateFeature(5, 0, 0, mapPoint);
-                lastDateUpdate = Date.now();
-              }
-              updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
-              sessionStorage.lastPosition = JSON.stringify(coordinates);
-            }
-          }
-        })
-        getLocation();
-      });
-
-    } else {
-      showError("Géolocalisation non supportée");
-    }
-  }
 
   // Lancement de l'application en mode salle de commandement
   function startAdminMode() {
@@ -332,52 +267,7 @@
     vectorSource.refresh();
   }
 
-  // /!\ POUR INFO : deplacee dans la methode initMap car il y a du code a executer dans le callback /!\
-  // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
-  // si et seulement si j'existe deja
-  // function getMyFeature() {
-  //   client.search({
-  //     index: INDEX,
-  //     type: ES_TYPE,
-  //     body: {
-  //       query : { match : {"neo_id" : id }}
-  //     }
-  //   }, function(error, response) {
-  //     if (error != undefined) {
-  //       console.error(error);
-  //     } else if (response.hits.total == 0) {
-  //       console.log(id+' non present dans la base');
-  //     } else {
-  //       console.log(response.hits.hits[0]);
-  //       objectId = response.hits.hits[0]._id;
-  //     }
-  //   });
-  // }
 
-
-
-
-
-  // Permet de mettre a jour l'affichage des positions sur la carte
-  function refresh(hits) {
-    refreshId();
-    var i, length = hits.length;
-    if (length == 0) return;
-    console.log('refresh');
-    vectorSource.clear();
-    for (i = 0; i < length ; i++) {
-      var feature = hits[i];
-      var timestamp = feature._source.neo_timestamp;
-      var delta = Date.now() - timestamp;
-      if (delta > 60*6 * MINUTE_IN_MILLIS) {
-        continue;
-      }
-      if (feature._source.neo_accur > 24) {
-        addCircle(feature, delta);
-      }
-      addMarker(feature, delta);
-    }
-  }
 
   // Permet de recuperer la couleur de l'image .png a partir d'une couleur
   function getColor(color) {

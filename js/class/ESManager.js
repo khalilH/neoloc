@@ -19,7 +19,7 @@ ESManager.prototype.searchExec = function (searchParams, onSuccess, onError)
 	            return false;
 	          }
 	        } else {
-	          onSuccess(response.hits.hits);
+	          onSuccess(response, error);
 	        }
 	      });
 	

@@ -134,27 +134,106 @@
   }
   
   
+  /**
+   * Lancement de l'application en mode user
+   */
+  function startUserMode() {
+    if (navigator.geolocation) {
+      openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
+      var point;
+      
+      //recuperer le filtre de recherche
+      var searchParams = ofeature.getFeature(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, id);
+      
+      var onSuccess = function(response, error){
+          if (error != undefined) {
+              console.error(error);
+            } else if (response.hits.total == 0) {
+              console.log(id+' non present dans la base');
+            } else {
+              var feature = response.hits.hits[0];
+              objectId = feature._id;
+              console.log(objectId);
+              point = [feature._source.neo_x, feature._source.neo_y];
+              neo_type = feature._source.neo_type;
+              refreshInputRadio(neo_type);
+              sessionStorage.lastPosition = JSON.stringify(point);
+              centerMap(point);
+            }
+
+            // Gestion du click simple sur la carte pour l'initialisation manuelle
+            // de sa position en attente du fix GPS
+            var mapDiv = document.getElementById('map');
+            var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+
+            mapDiv.addEventListener('mousedown', function(event) {
+              console.log(event);
+              mousedown_x = event.layerX;
+              mousedown_y = event.layerY;
+            });
+
+            mapDiv.addEventListener('mouseup', function(event) {
+              mouseup_x = event.layerX;
+              mouseup_y = event.layerY;
+
+              if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
+                if(!isGPSReady) {
+                  var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
+                  var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
+                  console.log(mapPoint);
+                  refreshId();
+                  if (objectId == null) {
+                    addFeature(5, 0, 0, mapPoint);
+                  } else {
+                    updateFeature(5, 0, 0, mapPoint);
+                    lastDateUpdate = Date.now();
+                  }
+                  updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
+                  sessionStorage.lastPosition = JSON.stringify(coordinates);
+                }
+              }
+            })
+            getLocation();              	  
+      };//fin onSuccess
+      
+  	  //checher/executer 
+	  es.searchExec(searchParams, onSuccess, null);
+    }else{
+      showError("Géolocalisation non supportée");
+    }
+  }  
   
-  // Permet de recuperer uniquement les features qui seront visibles sur la carte
+  
+  /**
+   * Permet de recuperer et afficher uniquement les features qui seront visibles sur la carte
+   */
   function getFeaturesInMapExtent() {
 	  
     if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
-
+      //recuperer le filtre de recherche
       var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
-  	  var onSuccess = function(features){
-  		  console.log("sucsscess");
-  		console.log(features);
-	    if(features){
-  	          refresh(features);
+  	  /**
+  	   * callback succes
+  	   * @param response //reponse d'ElasticSearch
+  	   */
+      var onSuccess = function(response){
+	    if(response.hits.hits){
+	    	  //rafraichir la carte
+  	          ofeature.refreshFeatures(response.hits.hits);
+  	          //noter la date de la query
   	          lastDateQuery = Date.now();
   	          if (allowXHR) {
   	            allowXHR = false;
   	          }
   	      }  		  
   	  };
+  	  //checher/executer 
 	  es.searchExec(searchParams, onSuccess, null);
 
     }else{
     	  console.log('TOO SOON - getFeaturesInMapExtent');    	  
     }	  
   }  
+  
+  
+  
