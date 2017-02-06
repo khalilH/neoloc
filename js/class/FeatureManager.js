@@ -70,6 +70,19 @@ FeatureManager.prototype.getUpdateFeatureParams = function (index, type, id, doc
 };
 
 
+/**
+ * 
+ */
+FeatureManager.prototype.getAddFeatureParams = function (index, type, doc){
+
+	return {
+	    index: index,
+	    type: type,
+	    body: doc
+	  };
+
+};
+
 
 
 /**
@@ -123,17 +136,17 @@ FeatureManager.prototype.add = function (index, type, accuracy, heading, speed, 
 
 	var doc = this.createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 	
-	var params = this.getUpdateFeatureParams(index, type, id, doc);
+	var params = this.getAddFeatureParams(index, type, doc);
 
 	var onSuccess = function(response, error){
-		console.log("update ok");
+		console.log("ajout ok");
         console.log(response);
         if (!allowXHR) {
           allowXHR = true;
         }		
 	};
-	
-	this.es.indexExec(params, onSuccess, null);
+	console.log(params);
+	//this.es.indexExec(params, onSuccess, null);
 	
 };
 

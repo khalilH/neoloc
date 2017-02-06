@@ -183,10 +183,10 @@
                   console.log(mapPoint);
                   refreshId();
                   if (objectId == null) {
-                    addFeature(5, 0, 0, mapPoint);
+                    //addFeature(5, 0, 0, mapPoint);
+                	 ofeature.add(id, type, NEOCONFIG.es.index, NEOCONFIG.es.type.neo, 5, 0, 0, mapPoint);
                   } else {
-                	  ofeature.update(id, type, objectId, NEOCONFIG.es.index, NEOCONFIG.es.type.neo, 5, 0, 0, mapPoint);
-                	  //updateFeature(5, 0, 0, mapPoint);
+                	ofeature.update(id, type, objectId, NEOCONFIG.es.index, NEOCONFIG.es.type.neo, 5, 0, 0, mapPoint);
                     lastDateUpdate = Date.now();
                   }
                   updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
