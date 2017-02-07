@@ -3,45 +3,137 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>POC Geoloc - OL</title>
+  <title>POC Geoloc</title>
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
-
+  <link rel="stylesheet" href="datepicker/bootstrap-datetimepicker.min.css">
 </head>
 <body>
 
-  <div id="map"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <div id="sidebar" class="col-sm-4 col-md-3 menubar">
+        <ul class="nav nav-menubar">
 
-  <div id="idDiv" >
-    <p>Identifiant radio</p>
-    <form id="myForm" onsubmit="return false;">
-      <div id="idInputDiv"><input id="idInput" type="text" name="idRadio"></div>
-      <a href="#"><img src="images/bicycle.png" onclick="login('b_')" alt="vélo"></a>
-      <a href="#"><img src="images/bike.png" onclick="login('m_')" alt="moto"></a>
-      <a href="#"><img src="images/car.png" onclick="login('c_')" alt="voiture"></a><br>
-      <a href="#"><img src="images/policeman.png" onclick="login('p_')" alt="piéton"></a>
-      <a href="#"><img src="images/office.png" onclick="login('o_')" alt="bureau"></a>
-      <a href="#"><img src="images/boat.png" onclick="login('f_')" alt="bateau"></a>
-    </form>
+          <!-- Formulaire d'identification -->
+          <li onclick="toggle('idDiv')"><a href="#">Identifiant Radio</a></li>
+          <div id="idDiv" >
+            <form id="myForm" onsubmit="return false;">
+              <div class="row">
+                <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+                  <div id="idInputDiv" class="input-group">
+                    <input type="text" class="form-control" name="idRadio" placeholder="Id radio">
+                    <span class="input-group-btn">
+                      <button id="goButton" class="btn btn-info active" type="button" onclick="login()">Go</button>
+                    </span>
+                  </div>
+                  <span id="idError" class="label label-danger" style="display:none;"></span>
+                </div>
+              </div>
+              <div class="row">
+                <div class='col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1'>
+                  <div class="form-group">
+                    <div class='input-group date' id='datetimepicker1'>
+                      <input id="finVacation" type='text' placeholder="Date/Heure fin de vacation" class="form-control"/>
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+                  <label class="radio-inline">
+                    <input type="radio" name="type" value="bicycle" checked>
+                    <img src="images/bicycle.png" alt="vélo" class="imgButton">
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="type" value="bike">
+                    <img src="images/bike.png" alt="moto" class="imgButton">
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="type" value="car">
+                    <img src="images/car.png" alt="voiture" class="imgButton">
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="type" value="policeman">
+                    <img src="images/policeman.png" alt="piéton" class="imgButton">
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Creer un evenement -->
+          <li onclick="toggle('evenementDiv')"><a href="#">Créer un évènement</a></li>
+          <div id="evenementDiv" class="row">
+            <form id="evenementForm">
+              <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="evtTitre" placeholder="Titre">
+                  <span class="input-group-btn">
+                    <button class="btn btn-info" type="button" onclick="handleCreateEvent()">Créer</button>
+                  </span>
+                </div>
+              </div>
+              <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1">
+                <textarea class="form-control" rows="3" name="evtDescription" placeholder="Description"></textarea>
+                <span id="evtError" class="label label-danger" style="display:none;"></span>
+                <span id="evtSuccess" class="label label-success" style="display:none;"></span>
+                <span id="evtInfo" class="label label-info" style="display:none;"></span>
+              </div>
+            </form>
+          </div>
+
+          <!-- Exemple de sous-menu  -->
+          <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
+          <div class="row">
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          </div>
+
+          <li><a href="#">Analytics</a></li>
+
+          <li><a href="#">Export</a></li>
+
+          <li><a href="#">Analytics</a></li>
+
+          <!-- Exemple de sous-menu -->
+          <li onclick="toggle('loremDiv2')" ><a href="#">Lorem</a></li>
+          <div class="row">
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv2">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          </div>
+
+          <li><a href="#">Reports</a></li>
+
+          <li><a href="#">Analytics</a></li>
+
+          <li><a href="#">Export</a></li>
+        </ul>
+
+      </div>
+      <div id="map" class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+        <span id="firefox-missing"  style="display:none" class="label label-danger">
+          Votre navigateur n'est pas supporté.<br> Cette application nécessite le navigateur Firefox
+        </span>
+      </div>
+    </div>
   </div>
 
   <div id="error" class="popup" style="display:none"></div>
   <div id="notification" class="popup" style="display:none"></div>
 
-  <div id="centerDiv">
-    <div id="centerUI">
-      <div id="centerText">
-        Centrer la carte
-      </div>
-    </div>
-  </div>
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
   <script src="jquery-3.1.1.min.js"></script>
+  <script src="elasticsearch/elasticsearch.jquery.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="moment.min.js"></script>
+  <script src="datepicker/bootstrap-datetimepicker.min.js"></script>
+  <script src="datepicker/fr.js"></script>
+
   <script>
-  const WSURL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services/PP/DSPAPTabletteNeo/FeatureServer/0';
-  const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/server/rest/services';
-  const TILE_URL = BASE_URL + '/PP/FOND_PP_FINAL_512/MapServer';
+  const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/esri';
+  const TILE_URL = BASE_URL + '/server/rest/services/PP/FOND_PP_FINAL_512/MapServer';
   var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';
   const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
 
@@ -51,17 +143,6 @@
   const REFRESH_TIME = 6 * SECOND_IN_MILLIS;
 
   const EARTH_RADIUS = 6371.01;
-  const maxExtent =
-  {
-    'xmin' : 539296.8634946088,
-    'ymin' : 6778524.307136604,
-    'xmax' : 757843.1339204831,
-    'ymax' : 6900762.051612093,
-    'spatialReference' : {
-      'wkid' : 102110,
-      'latestWkid' : 2154
-    }
-  }
 
   const _E7 = Math.pow(10, 7);
   const RESOLUTIONS = [
@@ -84,53 +165,49 @@
     0.06614596562526459
   ]
 
-  var objectId = null, isGPSReady = false, id; // id = identifiantRadio saisi au debut
-  var map, outSR;
+  // Indexs Elasticsearch
+  const INDEX = 'neo';
+
+  // Types Elasticsearch
+  const NEO_TYPE = 'tests'
+  const EVENT_TYPE = 'events'
+
+  // Attributs Elasticsearch
+  const _NEO_ID = 'neo_id';
+  const _NEO_X = 'neo_x';
+  const _NEO_Y = 'neo_y';
+  const _NEO_ACCURACY = 'neo_accur';
+  const _NEO_TIMESTAMP = 'neo_timestamp';
+  const _NEO_HEADING = 'neo_heading';
+  const _NEO_SPEED = 'neo_speed';
+  const _NEO_TYPE = 'neo_type';
+  const _NEO_FIN_VACATION = 'neo_fin'
+
+  const _EVENT_TITRE = 'evt_titre';
+  const _EVENT_X = 'evt_x';
+  const _EVENT_Y = 'evt_y';
+  const _EVENT_AUTHOR = 'evt_author';
+  const _EVENT_DESCRIPTION = 'evt_description';
+
+  var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
+  // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
+  var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
-  var vectorSource;
   var allowXHR = true;
+  var isMenuVisible = true;
+  var form = document.getElementById('myForm');;
+  window.app = {};
+  var app = window.app;
 
-  // Saisie de l'identifiant Radio
-  function login(type) {
-    var form = document.getElementById('myForm');
-    var idRadio = form.idRadio.value;
-    if (idRadio != '0000' && idRadio != '') {
-      id = type+idRadio;
-      $('#idDiv').fadeOut(400);
-      start();
-    } else {
-      showError('identifiant inconnu');
-    }
-  }
+  // Creation connexion elasticsearch
+  var client = new $.es.Client({
+    hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
+  });
 
-  // Lancement de l'application
-  function start() {
-    if (navigator.geolocation) {
-      openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
-      initMap();
-    } else {
-      showError("Géolocalisation non supportée");
-    }
-  }
-
-  // Initialisation de la map, du bouton 'centrer la carte'
+  // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
   function initMap() {
-    proj4.defs("EPSG:2154", "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-    var point;
-
-    outSR = {"wkid":102110,"latestWkid":2154}; // Referentiel de Lambert93 sous le format connu d'esri
-
-    var myLastFeature = getMyFeature(id);   // Recuperation de ma feature si elle existe
-    if (myLastFeature != null) {
-      objectId = myLastFeature.attributes.objectid;
-      console.log(objectId);
-      point = [myLastFeature.geometry.x, myLastFeature.geometry.y];
-    } else {
-      point = proj4('EPSG:4326', LAMBERT93, [2.362765, 48.841291]);
-      console.log("je n'ai pas de feature");
-    }
-    sessionStorage.lastPosition = JSON.stringify(point);
+    proj4.defs("EPSG:2154", LAMBERT93);
 
     // Debut d'initialisation de l'objet map
     var EPSG_2154 = new ol.proj.Projection({
@@ -148,13 +225,82 @@
       tileSize: 512
     });
 
+    var point = proj4('EPSG:4326', LAMBERT93, [2.362765, 48.841291]);
+
     vectorSource = new ol.source.Vector({});
 
+    var freepik = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
+      ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
+      ' is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"'+
+      ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
+    var plainicon = new ol.Attribution({
+      html: '<div>Icons made by <a href="http://www.flaticon.com/authors/plainicon"'+
+      ' title="Plainicon">Plainicon</a> from <a href="http://www.flaticon.com"'+
+      ' title="Flaticon">www.flaticon.com</a> is licensed by '+
+      '<a href="http://creativecommons.org/licenses/by/3.0/"'+
+      ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+    });
+
+    // Ajout des boutons personalises (centerMap + toggleMenu)
+    app.RecenterMap = function(opt_options) {
+      var options = opt_options || {};
+      var button = document.createElement('button');
+      button.innerHTML = '<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>';
+
+      var this_ = this;
+      var handleRecenterMap = function() {
+        recenterMap();
+      };
+      button.addEventListener('click', handleRecenterMap, false);
+
+      var element = document.createElement('div');
+      element.className = 'centerButton ol-unselectable ol-control';
+      element.appendChild(button);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
+
+    };
+    app.ToggleMenu = function(opt_options) {
+      var options = opt_options || {};
+      var button = document.createElement('button');
+      button.innerHTML = '<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>';
+
+      var this_ = this;
+      var handleToggleMenu = function() {
+        toggleMenu();
+      };
+      button.addEventListener('click', handleToggleMenu, false);
+
+      var element = document.createElement('div');
+      element.className = 'toggle ol-unselectable ol-control';
+      element.appendChild(button);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
+
+    };
+    ol.inherits(app.RecenterMap, ol.control.Control);
+    ol.inherits(app.ToggleMenu, ol.control.Control);
+
     map = new ol.Map({
+      controls: ol.control.defaults({
+      }).extend([
+        new app.RecenterMap(),
+        new app.ToggleMenu()
+      ]),
       target: 'map',
       layers: [
         new ol.layer.Tile({
           source: new ol.source.XYZ({
+            attributions : [freepik, plainicon],
             tileUrlFunction: function(tileCoord, pixelRatio, projection) {
               var z = tileCoord[0];
               var x = tileCoord[1];
@@ -181,60 +327,215 @@
     });
     // Fin d'initialisation de l'objet map
 
-    // Gestion du click simple sur la carte pour l'initialisation manuelle
-    // de sa position en attente du fix GPS
-    var mapDiv = document.getElementById('map');
-    var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
-
-    mapDiv.addEventListener('mousedown', function(event) {
-      mousedown_x = event.clientX;
-      mousedown_y = event.clientY;
-    });
-
-    mapDiv.addEventListener('mouseup', function(event) {
-      mouseup_x = event.clientX;
-      mouseup_y = event.clientY;
-
-      if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
-        if(!isGPSReady) {
-          var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
-          var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
-          mapPoint.spatialReference = JSON.parse(JSON.stringify(outSR));
-          var mapPoint_4326 = proj4(LAMBERT93, 'EPSG:4326', coordinates);
-          console.log(mapPoint);
-          console.log(mapPoint_4326);
-          // x = lng, y = lat pour mapPoint_4326
-          if (objectId == null) {
-            addFeature(mapPoint_4326[1], mapPoint_4326[0], 5, 203, 5, mapPoint);
-          } else {
-            updateFeature(mapPoint_4326[1], mapPoint_4326[0], 5, 203, 5, mapPoint);
-            lastDateUpdate = Date.now();
-          }
-          sessionStorage.lastPosition = JSON.stringify(coordinates);
-        }
-      }
-    })
-
     // Gestion de l'evenement lorsque la vue de la carte change
     map.on('moveend', function(event) {
       if (!allowXHR) {allowXHR = true;}
       getFeaturesInMapExtent();
     });
 
-    initControls();
+    // Suppression de la class disabled (reste present apres un F5)
+    $('#goButton').removeAttr('disabled');
+    initDateTimePicker();
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
-    getLocation();
-    getFeaturesInMapExtent();
   }
 
-  // Initialisation du bouton permettant de recentrer la carte
-  function initControls() {
-    var centerUI = document.getElementById('centerUI');
-    centerUI.addEventListener('click', recenterMap);
-    document.getElementById('centerDiv').style.display = 'inline';
+  // Test du navigateur
+  var regexp = /Firefox/;
+  if (!regexp.test(navigator.userAgent)) {
+    document.getElementById('firefox-missing').style.display = "block";
+  } else {
+    initMap();
   }
 
-  // Methode appelée a chaque modification de la vue de la map
+  // permet d'activer ou non le focus lorsque l'utilisateur veut rentrer une date
+  function initDateTimePicker() {
+    // code specifique au S5 (height > 640), attention en cas de changement de materiel
+    if (screen.height > 640) {
+      $('#datetimepicker1').datetimepicker({
+        locale: 'fr',
+        focusOnShow: false,
+        showTodayButton: true,
+        showClose: true,
+        toolbarPlacement: 'top',
+        format: 'MM/DD/YYYY HH:mm',
+        minDate: new Date()
+      });
+    } else {
+      $('#datetimepicker1').datetimepicker({
+        locale: 'fr',
+        showTodayButton: true,
+        showClose: true,
+        toolbarPlacement: 'top',
+        format: 'MM/DD/YYYY HH:mm',
+        minDate: new Date()
+      });
+    }
+  }
+
+  // Permet d'ouvrir ou de fermer le volet du menu dont l'id du div est name
+  function toggle(name) {
+    if ($('#'+name)[0].hidden) {
+      $('#'+name).fadeIn(500);
+      $('#'+name)[0].hidden = false;
+    }
+    else {
+      $('#'+name).fadeOut(500);
+      $('#'+name)[0].hidden = true;
+    }
+  }
+
+  // permet de mettre a jour le type, l'idRadio ete la date/heure de fin de vacation
+  function refreshId() {
+    var idRadio = form.idRadio.value;
+    var _type = form.type.value;
+    var _date = document.getElementById('finVacation').value;
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
+      id = idRadio;
+      type = _type;
+      if (_date != '') {
+        var tmp = new Date(_date);
+        dateFinVacation = tmp.getTime();
+      }
+      else {
+        dateFinVacation = 0;
+      }
+    }
+  }
+
+  // Permet de mettre automatiquement a jour le type du vehicule sur le formulaire
+  function refreshInputRadio(neo_type) {
+    switch (neo_type) {
+      case "bicycle":
+      form.type[0].checked = true;
+      break;
+      case "bike":
+      form.type[1].checked = true;
+      break;
+      case "car":
+      form.type[2].checked = true;
+      break;
+      case "policeman":
+      form.type[3].checked = true;
+      break;
+      default:
+      console.error("je ne dois pas passer ici "+neo_type);
+    }
+  }
+
+  // Saisie de l'identifiant Radio
+  function login() {
+    var idRadio = form.idRadio.value;
+    var _type = form.type.value;
+    var _date = document.getElementById('finVacation').value;
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
+      id = idRadio;
+      type = _type;
+      if (_date != '') {
+        var tmp = new Date(_date);
+        dateFinVacation = tmp.getTime();
+      }
+      else {
+        dateFinVacation = 0;
+      }
+      $('#goButton').attr('disabled', 'disabled');
+      $('#goButton').addClass('disabled');
+      $('#goButton').removeClass('btn-info');
+      $('#goButton').addClass('btn-danger');
+      startUserMode();
+    } else {
+      showError('Identifiant radio non indiqué', 'idError');
+    }
+  }
+
+  // Lancement de l'application en mode user
+  function startUserMode() {
+    if (navigator.geolocation) {
+      openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
+      var point;
+      client.search({
+        index: INDEX,
+        type: NEO_TYPE,
+        body: {
+          query : { match : {"neo_id" : id }}
+        }
+      }, function(error, response) {
+        if (error != undefined) {
+          console.error(error);
+        } else if (response.hits.total == 0) {
+          console.log(id+' non present dans la base');
+        } else {
+          var feature = response.hits.hits[0];
+          objectId = feature._id;
+          console.log(objectId);
+          point = [feature._source.neo_x, feature._source.neo_y];
+          neo_type = feature._source.neo_type;
+          refreshInputRadio(neo_type);
+          sessionStorage.lastPosition = JSON.stringify(point);
+          centerMap(point);
+        }
+
+        // Gestion du click simple sur la carte pour l'initialisation manuelle
+        // de sa position en attente du fix GPS
+        var mapDiv = document.getElementById('map');
+        var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+
+        mapDiv.addEventListener('mousedown', function(event) {
+          console.log(event);
+          mousedown_x = event.layerX;
+          mousedown_y = event.layerY;
+        });
+
+        mapDiv.addEventListener('mouseup', function(event) {
+          mouseup_x = event.layerX;
+          mouseup_y = event.layerY;
+
+          if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
+            if(!isGPSReady) {
+              var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
+              var mapPoint = {'x': coordinates[0], 'y': coordinates[1]};
+              console.log(mapPoint);
+              refreshId();
+              if (objectId == null) {
+                addFeature(5, 0, 0, mapPoint);
+              } else {
+                updateFeature(5, 0, 0, mapPoint);
+                lastDateUpdate = Date.now();
+              }
+              updateLocalFeatureGeometry(mapPoint.x, mapPoint.y);
+              sessionStorage.lastPosition = JSON.stringify(coordinates);
+            }
+          }
+        })
+        getLocation();
+      });
+
+    } else {
+      showError("Géolocalisation non supportée");
+    }
+  }
+
+  // Lancement de l'application en mode salle de commandement
+  function startAdminMode() {
+
+  }
+
+  // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
+  function toggleMenu() {
+    if (isMenuVisible) {
+      document.getElementById('sidebar').style.display = 'none';
+      document.getElementById('map').style.top = "0";
+      map.updateSize();
+      isMenuVisible = false;
+    }
+    else {
+      document.getElementById('sidebar').style.display = 'block';
+      document.getElementById('map').style.top = "35%";
+      map.updateSize();
+      isMenuVisible = true;
+    }
+  }
+
+  // Methode appelée pour recentrer la carte sur la derniere position connue
   function recenterMap() {
     console.log("recenter");
     var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
@@ -265,7 +566,7 @@
     );
   }
 
-  // Met a jour la position sur la couche portal NEO si et seulement si la derniere
+  // Met a jour la position dans l'index ES si et seulement si la derniere
   // mise a jour n'a pas eu lieu dans les 5 dernieres secondes
   function updatePosition(coords) {
     var lat = coords.latitude, lng = coords.longitude, accuracy = coords.accuracy,
@@ -288,118 +589,119 @@
     var lastPosition = JSON.stringify([tmp[0], tmp[1]]);
     sessionStorage.lastPosition = lastPosition;
     var mapPoint_2154 = {'x': tmp[0], 'y': tmp[1]};
+    refreshId();
     if (objectId == null) {
-      addFeature(lat, lng, accuracy, heading, speed, mapPoint_2154);
+      addFeature(accuracy, heading, speed, mapPoint_2154);
     } else {
-      updateFeature(lat, lng, accuracy, heading, speed, mapPoint_2154);
+      updateFeature(accuracy, heading, speed, mapPoint_2154);
     }
   }
 
-  // Appel à l'API REST pour créer une nouvelle Feature
-  function addFeature(lat, lng, accuracy, heading, speed, mapPoint) {
-    var neo_id = id ? id : 'ALPHA';
+  // Cree un document representant la position d'un utilisateur
+  function createDocument(id, type, x, y, accuracy, heading, speed, timestamp) {
+    var doc = {};
+    doc[_NEO_ID] = id;
+    doc[_NEO_TYPE] = type;
+    if (dateFinVacation != 0) {
+      doc[_NEO_FIN_VACATION] = dateFinVacation;
+    }
+    doc[_NEO_X] = x;
+    doc[_NEO_Y] = y;
+    doc[_NEO_ACCURACY] = accuracy;
+    doc[_NEO_TIMESTAMP] = timestamp;
+    doc[_NEO_HEADING] = heading;
+    doc[_NEO_SPEED] = speed;
+    return doc;
+  }
 
-    var attributes =
-    {
-      'neo_id' : neo_id,
-      'neo_lat' : lat,
-      'neo_lng' : lng,
-      'neo_accur' : accuracy,
-      // 'neo_lat' : Math.floor(heading),
-      // 'neo_lng' : Math.floor(speed),
-      'neo_timestamp' : Math.floor(Date.now() /1000)
-    };
+  // Indexation d'un nouveau document(position) dans ES
+  function addFeature(accuracy, heading, speed, mapPoint) {
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
-    var geometry = {'x' : mapPoint.x, 'y' : mapPoint.y};
-    var features = {'attributes' : attributes, 'geometry' : geometry};
-
-    var _url = WSURL + '/addFeatures?f=json&features='+JSON.stringify([features]);
-
-    $.ajax({
-      type: 'POST',
-      url : _url,
-      async: false,
-      timeout: 5000,
-      success : function(a,b,c) {
-        objectId = JSON.parse(a).addResults[0].objectId;
+    client.index({
+      index: INDEX,
+      type: NEO_TYPE,
+      body: doc
+    }, function (error, response) {
+      if (error != undefined) {
+        console.error(error);
+      } else {
+        objectId = response._id;
         if (!allowXHR) {
           allowXHR = true;
         }
-        getFeaturesInMapExtent();
         console.log(objectId);
-      },
-      error : function(a,b,c) {
-        if (b == 'timeout') {
-          showError("Perte de connexion");
-        }
       }
     });
   }
 
-  // Appel à l'API REST pour mettre a jour une Feature existante
-  function updateFeature(lat, lng, accuracy, heading, speed, mapPoint) {
-    var neo_id = id ? id : 'ALPHA';
+  // Mise a jour d'un document(position) deja indexe dans ES
+  function updateFeature(accuracy, heading, speed, mapPoint) {
+    var doc = createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 
-    var attributes =
-    {
-      'OBJECTID' : objectId,
-      'neo_id' : neo_id,
-      'neo_lat' : lat,
-      'neo_lng' : lng,
-      'neo_accur' : accuracy,
-      // 'neo_lat' : Math.floor(heading),
-      // 'neo_lng' : Math.floor(speed),
-      'neo_timestamp' : Math.floor(Date.now() /1000)
-    };
-
-    var geometry = {'x' : mapPoint.x, 'y' : mapPoint.y};
-    var features = {'attributes' : attributes, 'geometry' : geometry};
-
-    var _url = WSURL + '/updateFeatures?f=json&features='+JSON.stringify([features]);
-
-    $.ajax({
-      type: 'POST',
-      url : _url,
-      async: false,
-      timeout: 5000,
-      success: function(a,b,c) {
+    client.index({
+      index: INDEX,
+      type: NEO_TYPE,
+      id: objectId,
+      body: doc
+    }, function (error, response) {
+      if (error != undefined) {
+        console.error(error);
+      } else {
+        console.log(response);
         if (!allowXHR) {
           allowXHR = true;
         }
-        getFeaturesInMapExtent();
-      },
-      error : function(a,b,c) {
-        if (b == 'timeout') {
-          showError("Perte de connexion");
-        }
       }
     });
   }
 
+  // Permet de mettre a jour localement la position et le type de ma feature
+  function updateLocalFeatureGeometry(x, y) {
+    var features = vectorSource.getFeatures();
+    var length = features.length;
+    for (var i = 0; i < length; i++) {
+      if (features[i].get('neo_id') == id) {
+        refreshId()
+        features[i].setGeometry(new ol.geom.Point([x, y]));
+        features[i].set('type', type);
+        vectorSource.refresh();
+        return;
+      }
+    }
+    var point = new ol.geom.Point([x, y]);
+    var feat = new ol.Feature({geometry: point});
+    feat.set('color', 'red');
+    feat.set('neo_id', id);
+    feat.set('type', type);
+    feat.setStyle(markerStyle);
+    vectorSource.addFeature(feat);
+    vectorSource.refresh();
+  }
+
+  // /!\ POUR INFO : deplacee dans la methode initMap car il y a du code a executer dans le callback /!\
   // permet de recuperer ma feature (et donc objectID) a partir de mon identifiant radio
   // si et seulement si j'existe deja
-  function getMyFeature() {
-    var res = null;
-    var _url = WSURL + '/query?f=json&geometry='+JSON.stringify(maxExtent)+'&outFields=*&where=neo_id%20=%20%27'+id+'%27';
-    $.ajax({
-      type: 'GET',
-      url : _url,
-      async: false,
-      success : function(a,b,c) {
-        var tmp = JSON.parse(a);
-        if (tmp && tmp.features && tmp.features[0] && tmp.features[0].attributes && tmp.features[0].geometry) {
-          res = tmp.features[0];
-        }
-      },
-      error : function(a,b,c) {
-        alert('error');
-      }
-    });
-    return res;
-  }
+  // function getMyFeature() {
+  //   client.search({
+  //     index: INDEX,
+  //     type: ES_TYPE,
+  //     body: {
+  //       query : { match : {"neo_id" : id }}
+  //     }
+  //   }, function(error, response) {
+  //     if (error != undefined) {
+  //       console.error(error);
+  //     } else if (response.hits.total == 0) {
+  //       console.log(id+' non present dans la base');
+  //     } else {
+  //       console.log(response.hits.hits[0]);
+  //       objectId = response.hits.hits[0]._id;
+  //     }
+  //   });
+  // }
 
-  // Permet d'obtenir les limites(extent) de la carte en projection de lambert93
-  // dans le bon format pour effectuer une requete REST /query
+  // Permet d'obtenir les limites(extent) de la vue active de la carte en projection de lambert93
   function getMapExtent() {
     var e = map.getView().calculateExtent(map.getSize());
     var extent = {
@@ -407,7 +709,6 @@
       'ymin': e[1],
       'xmax': e[2],
       'ymax': e[3],
-      'SpatialReference': {'wkid': 102110, 'latestWkid': 2154}
     }
     return extent;
   }
@@ -415,87 +716,59 @@
   // Permet de recuperer uniquement les features qui seront visibles sur la carte
   function getFeaturesInMapExtent() {
     if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
-      var res = null;
       var geometry = getMapExtent();
-      var _url = WSURL + '/query?f=json&outFields=*&geometry='+JSON.stringify(geometry);
-      $.ajax({
-        type: 'GET',
-        url : _url,
-        async: true,
-        timeout: 5000,
-        success : function(a,b,c) {
-          var tmp = JSON.parse(a);
-          console.log(tmp);
-          if (tmp && tmp.features) {
-            res = tmp.features;
-            localFeatures = JSON.parse(JSON.stringify(tmp.features));
-            refresh(res);
+      client.search({
+        index: INDEX,
+        body: {
+          query : {
+            "bool" : {
+              "must" : [
+                {"range" : {"neo_x": { "gte" : geometry.xmin, "lte" : geometry.xmax } } },
+                {"range" : {"neo_y": { "gte" : geometry.ymin, "lte" : geometry.ymax } } }
+              ]
+            }
           }
         },
-        error : function(a,b,c) {
-          if (b == 'timeout') {
-            console.log('timeout');
-            showError('Perte de connexion');
-            // A tester en exterieur quand les champs neo_speed et neo_heading seront rajoutes
-            // calculateNextPositions();
-            // document.getElementById('error').innerHTML = "Perte de connexion";
-            // $('#error').fadeIn(200).delay(400).fadeOut(200);
+        requestTimeout: 5 * SECOND_IN_MILLIS,
+        size: 1000
+      }, function(error, response) {
+        if (error != undefined) {
+          console.error(error);
+          if (error.status == 408) {
+            showError("Perte de connexion")
+          }
+        } else {
+          console.log(JSON.stringify(response.hits.hits.length));
+          refresh(response.hits.hits);
+          lastDateQuery = Date.now();
+          if (allowXHR) {
+            allowXHR = false;
           }
         }
       });
-      lastDateQuery = Date.now();
-      if (allowXHR) {allowXHR = false;}
-      return res;
     } else {
       console.log('TOO SOON - getFeaturesInMapExtent');
     }
   }
 
-  // Permet de mettre a jour l'affichage des features
-  function refresh(features) {
-    var i, length = features.length;
+  // Permet de mettre a jour l'affichage des positions sur la carte
+  function refresh(hits) {
+    refreshId();
+    var i, length = hits.length;
     if (length == 0) return;
     console.log('refresh');
     vectorSource.clear();
     for (i = 0; i < length ; i++) {
-      var feature = features[i];
-      var timestamp = feature.attributes.neo_timestamp * 1000;
+      var feature = hits[i];
+      var timestamp = feature._source.neo_timestamp;
       var delta = Date.now() - timestamp;
       if (delta > 60*6 * MINUTE_IN_MILLIS) {
         continue;
       }
-      if (feature.attributes.neo_accur > 24) {
+      if (feature._source.neo_accur > 24) {
         addCircle(feature, delta);
-        addMarker(feature, delta);
-      } else {
-        addMarker(feature, delta);
       }
-    }
-  }
-
-  // Permet de recuperer le prefixe de l'image .png a partir du 'type'
-  function getType(type) {
-    switch (type) {
-      case 'b_':
-      return 'bicycle';
-      break;
-      case 'm_':
-      return 'bike';
-      break;
-      case 'c_':
-      return 'car';
-      break;
-      case 'p_':
-      return 'policeman';
-      break;
-      case 'o_':
-      return 'office';
-      break;
-      case 'f_':
-      return 'boat';
-      break;
-      default:
-      console.error("getType : Je ne dois pas passer ici "+type);
+      addMarker(feature, delta);
     }
   }
 
@@ -572,7 +845,7 @@
     var zoom = map.getView().getZoom();
     var color = this.get('color');
     var suffixe = getColor(color);
-    var type = getType(this.get('type'));
+    var type = this.get('type');
 
     return [
       new ol.style.Style({
@@ -597,10 +870,11 @@
   // Permet d'ajouter un cercle d'incertitude sur la map a partir d'une feature
   // delta : temps depuis la derniere mise a jour de la feature
   function addCircle(feature, delta) {
-    var neo_id = feature.attributes.neo_id;
-    var radius = feature.attributes.neo_accur;
-    var geometry = feature.geometry;
-    var circle = new ol.geom.Circle([geometry.x, geometry.y], radius);
+    var neo_id = feature._source.neo_id;
+    var radius = feature._source.neo_accur;
+    var x = feature._source.neo_x;
+    var y = feature._source.neo_y;
+    var circle = new ol.geom.Circle([x, y], radius);
     var feat = new ol.Feature({geometry: circle});
     if (neo_id == id) {
       feat.set('color', 'red');
@@ -619,9 +893,11 @@
   // permet d'ajouter un marker sur la map a partir d'une feature
   // delta : temps depuis la derniere mise a jour de la feature
   function addMarker(feature, delta) {
-    var neo_id = feature.attributes.neo_id;
-    var geometry = feature.geometry;
-    var point = new ol.geom.Point([geometry.x, geometry.y]);
+    var neo_id = feature._source.neo_id;
+    var x = feature._source.neo_x;
+    var y = feature._source.neo_y;
+    var neo_type = feature._source.neo_type;
+    var point = new ol.geom.Point([x, y]);
     var feat = new ol.Feature({geometry: point});
     if (neo_id == id) {
       feat.set('color', 'red');
@@ -632,87 +908,26 @@
         feat.set('color', 'green');
       }
     }
-    feat.set('neo_id', neo_id.slice(2));
-    feat.set('type', neo_id.substring(0,2));
+    feat.set('neo_id', neo_id);
+    feat.set('type', neo_type);
     feat.setStyle(markerStyle);
     vectorSource.addFeature(feat);
   }
 
 
-  function degreeToRadian(angle) {
-    return angle * Math.PI / 180;
-  }
-
-  function radianToDegree(angle) {
-    return angle * 180 / Math.PI;
-  }
-
   function mphTokmph(speed) {
     return speed * 1.609344;
   }
 
-  // Permet d'extrapoler une nouvelle position a partir des coordonness GPS,
-  // du cap, de la vitesse, et du temps ecoule depuis la derniere maj
-  // lat,lng in WGS48, speed in km/h, heading in degrees, time in seconds
-  function getNext(lat, lng, speed, heading, time) {
-    console.log('in : '+lat+','+lng);
-    console.log('speed: '+speed);
-    console.log('heading: '+heading);
-    console.log('time: '+time);
-    var kmDistance = speed * (time / 3600);
-
-    var headingRad = degreeToRadian(heading);
-
-    var distRatio = kmDistance / EARTH_RADIUS;
-    var distRatioSine = Math.sin(distRatio);
-    var distRatioCosine = Math.cos(distRatio);
-
-    var startLatRad = degreeToRadian(lat);
-    var startLngRad = degreeToRadian(lng);
-
-    var startLatCos = Math.cos(startLatRad);
-    var startLatSin = Math.sin(startLatRad);
-
-    var endLatRads = Math.asin((startLatSin * distRatioCosine) + (startLatCos * distRatioSine * Math.cos(headingRad)));
-
-    var endLonRads = startLngRad
-    + Math.atan2(Math.sin(headingRad) * distRatioSine * startLatCos,
-    distRatioCosine - startLatSin * Math.sin(endLatRads));
-
-    var newLat = radianToDegree(endLatRads);
-    var newLng = radianToDegree(endLonRads);
-
-    var obj = [newLng, newLat]
-    console.log(obj);
-    return obj;
-  }
-
-  // Permet d'extrapoler localement les nouvelles positions des features visibles
-  // Utilisé en cas de coupure réseau pour le moment
-  function calculateNextPositions() {
-    var now = Math.floor(Date.now()/1000);
-    var length = localFeatures.length;
-    var i;
-    for (i = 0; i < length; i++) {
-      var feature = localFeatures[i];
-      var then = feature.attributes.neo_timestamp;
-      var geometry = feature.geometry;
-      var speed = feature.attributes.neo_speed;
-      var heading = feature.attributes.neo_heading;
-      var lat = feature.attributes.neo_lat;
-      var lng = feature.attributes.neo_lng;
-      var newPosition = getNext(lat, lng, speed, heading, now - then);
-      var tmp = proj4('EPSG:4326', LAMBERT93, newPosition)
-      localFeatures[i].geometry.x = tmp[0];
-      localFeatures[i].geometry.y = tmp[1];
-    }
-    refresh(localFeatures);
-  }
-
   // MESSAGES DE NOTIFICATION ET D'ERREUR
-  function showNotification(message) {
-    document.getElementById('notification').innerHTML = message;
-    $('#notification').fadeIn(400).delay(1500).fadeOut(400);
+  function showNotification(message, labelId) {
+    if (labelId != undefined) {
+      document.getElementById(labelId).innerHTML = message;
+      $('#'+labelId).fadeIn(400).delay(1500).fadeOut(400);
+    } else {
+      document.getElementById('notification').innerHTML = message;
+      $('#notification').fadeIn(400).delay(1500).fadeOut(400);
+    }
   }
 
   function openNotification(message) {
@@ -724,9 +939,70 @@
     $('#notification').fadeOut(200);
   }
 
-  function showError(message) {
-    document.getElementById('error').innerHTML = message;
-    $('#error').fadeIn(400).delay(2000).fadeOut(400);
+  function showError(message, labelId) {
+    if(labelId != undefined) {
+      document.getElementById(labelId).innerHTML = message;
+      $('#'+labelId).fadeIn(400).delay(1500).fadeOut(400);
+    } else {
+      document.getElementById('error').innerHTML = message;
+      $('#error').fadeIn(400).delay(2000).fadeOut(400);
+    }
+  }
+
+  function debugNotif() {
+    document.getElementById('notification').innerHTML = 'geolocalisation en cours, cliquez sur la carte pour indiquer votre position';
+    document.getElementById('error').innerHTML = 'Perte de connexion';
+    $('#notification').fadeIn(500);
+    $('#error').fadeIn(500);
+  }
+
+  // handler du clic sur le bouton creer un evenement
+  function handleCreateEvent() {
+    var form = document.getElementById('evenementForm')
+    var titre = form.evtTitre.value;
+    var description = form.evtDescription.value;
+    if (titre != '') {
+      addEvent(titre, description)
+    } else {
+      showError('Titre non indiqué', 'evtError')
+    }
+  }
+
+  // ajout d'un evenement dans ES si cela est possible
+  function addEvent(titre, description) {
+    if (id == undefined) {
+      showError('Connexion requise', 'idError');
+      return;
+    }
+
+    if (sessionStorage.lastPosition != undefined || isGPSReady) {
+      var docEvent = {};
+      docEvent[_EVENT_TITRE] = titre;
+      var pos = JSON.parse(sessionStorage.lastPosition);
+      docEvent[_EVENT_X] = pos[0];
+      docEvent[_EVENT_Y] = pos[1];
+      docEvent[_EVENT_AUTHOR] = id;
+      if (description != '') {
+        docEvent[_EVENT_DESCRIPTION] = description;
+      }
+      client.index({
+        index: INDEX,
+        type: EVENT_TYPE,
+        body: docEvent
+      }, function (error, response) {
+        if (error != undefined) {
+          console.error(error);
+        } else {
+          console.log(response);
+          showNotification('Évènement '+titre+' créé', 'evtSuccess');
+          var form = document.getElementById('evenementForm')
+          form.evtTitre.value = '';
+          form.evtDescription.value = '';
+        }
+      });
+    } else {
+        showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
+    }
   }
 
   </script>
