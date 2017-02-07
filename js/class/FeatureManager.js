@@ -132,9 +132,9 @@ FeatureManager.prototype.update = function (userID, userType, id, index, type, a
 };
 
 
-FeatureManager.prototype.add = function (index, type, accuracy, heading, speed, mapPoint){
+FeatureManager.prototype.add = function (userID, userType, index, type, accuracy, heading, speed, mapPoint){
 
-	var doc = this.createDocument(id, type, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
+	var doc = this.createDocument(userID, userType, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
 	
 	var params = this.getAddFeatureParams(index, type, doc);
 
@@ -145,8 +145,8 @@ FeatureManager.prototype.add = function (index, type, accuracy, heading, speed, 
           allowXHR = true;
         }		
 	};
-	console.log(params);
-	//this.es.indexExec(params, onSuccess, null);
+	
+	this.es.indexExec(params, onSuccess, null);
 	
 };
 
