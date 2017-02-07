@@ -85,45 +85,22 @@ FeatureManager.prototype.getAddFeatureParams = function (index, type, doc){
 
 
 
-/**
- * met a jour l'affichage des positions sur la carte
- * @param hits
- */
-FeatureManager.prototype.refreshFeatures = function (hits){
 
-		    refreshId();
-		    var i, length = hits.length;
-		    if (length == 0) return;
-		    console.log('refresh');
-		    vectorSource.clear();
-		    for (i = 0; i < length ; i++) {
-		      var feature = hits[i];
-		      var timestamp = feature._source.neo_timestamp;
-		      var delta = Date.now() - timestamp;
-		      if (delta > 60*6 * MINUTE_IN_MILLIS) {
-		        continue;
-		      }
-		      if (feature._source.neo_accur > 24) {
-		        addCircle(feature, delta);
-		      }
-		      addMarker(feature, delta);
-		    }
-
-};
 
 FeatureManager.prototype.save = function (index, type, user){
 
     if (user.ESid == null) {
   	  this.add(index, type, user);
-    } else {
+    } else {    	
   	  this.update(index, type, user);
     }
+    //console.log(user);
 	
 };
 
 FeatureManager.prototype.update = function (index, type, user){
 
-	var doc = this.createDocument(user.id, user.type, user.x, use.y, user.accuracy, user.heading, user.speed, Date.now());
+	var doc = this.createDocument(user.id, user.type, user.dateFinVac, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
 	
 	var params = this.getUpdateFeatureParams(index, type, user.ESid, doc);
 
@@ -142,13 +119,14 @@ FeatureManager.prototype.update = function (index, type, user){
 
 FeatureManager.prototype.add = function (index, type, user){
 
-	var doc = this.createDocument(user.id, user.type, user.x, use.y, user.accuracy, user.heading, user.speed, Date.now());
+	var doc = this.createDocument(user.id, user.type, user.dateFinVac, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
 	
 	var params = this.getAddFeatureParams(index, type, doc);
 
 	var onSuccess = function(response, error){
 		console.log("ajout ok");
         console.log(response);
+        user.ESid = response._id;
         if (!allowXHR) {
           allowXHR = true;
         }		
@@ -170,12 +148,12 @@ FeatureManager.prototype.add = function (index, type, user){
  * @param timestamp
  * @returns Object
  */
-FeatureManager.prototype.createDocument = function (id, type, x, y, accuracy, heading, speed, timestamp) {
+FeatureManager.prototype.createDocument = function (id, type, dateFinVac, x, y, accuracy, heading, speed, timestamp) {
 	  var doc = {};
 	  doc[this._NEO_ID] = id;
 	  doc[this._NEO_TYPE] = type;
-	  if (dateFinVacation != 0) {
-	    doc[this._NEO_FIN_VACATION] = dateFinVacation;
+	  if (dateFinVac != 0) {
+	    doc[this._NEO_FIN_VACATION] = dateFinVac;
 	  }
 	  doc[this._NEO_X] = x;
 	  doc[this._NEO_Y] = y;

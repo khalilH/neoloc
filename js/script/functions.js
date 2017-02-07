@@ -99,7 +99,7 @@
               var z = tileCoord[0];
               var x = tileCoord[1];
               var y = -tileCoord[2] - 1;
-              return URL_TEMPLATE.replace('{z}', z.toString())
+              return NEOCONFIG.mapServer.template.replace('{z}', z.toString())
               .replace('{y}', y.toString())
               .replace('{x}', x.toString());
             },
@@ -194,7 +194,7 @@
                   if (ouser.ESid != null) {
                 	  lastDateUpdate = Date.now();
                   }
-                  updateLocalFeatureGeometry(ouser.x, ouser.y);
+                  omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
                   sessionStorage.lastPosition = JSON.stringify(coordinates);
                 }
               }
@@ -218,6 +218,7 @@
     if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
       //recuperer le filtre de recherche
       var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
+      console.log(searchParams);
   	  /**
   	   * callback succes
   	   * @param response //reponse d'ElasticSearch
@@ -225,7 +226,7 @@
       var onSuccess = function(response){
 	    if(response.hits.hits){
 	    	  //rafraichir la carte
-  	          ofeature.refreshFeatures(response.hits.hits);
+  	          omap.refreshPositions(response.hits.hits);
   	          //noter la date de la query
   	          lastDateQuery = Date.now();
   	          if (allowXHR) {
@@ -234,7 +235,7 @@
   	      }  		  
   	  };
   	  //checher/executer 
-	  es.searchExec(searchParams, onSuccess, null);
+	  oes.searchExec(searchParams, onSuccess, null);
 
     }else{
     	  console.log('TOO SOON - getFeaturesInMapExtent');    	  
@@ -253,10 +254,10 @@
       if (_date != '') {
         var tmp = new Date(_date);
         ouser.dateFinVac = tmp.getTime();        
-      }
-      else {
+      } else {
     	ouser.dateFinVac = 0;
-      }    
+      }
+    }
   }
   
   
@@ -384,14 +385,16 @@
     var lastPosition = JSON.stringify([tmp[0], tmp[1]]);
     sessionStorage.lastPosition = lastPosition;
     var mapPoint_2154 = {'x': tmp[0], 'y': tmp[1]};
+    ouser.x = mapPoint_2154.x;
+    ouser.y = mapPoint_2154.y;
+    ouser.accuracy = accuracy;
+    ouser.heading = heading;
+    ouser.speed = speed;
     refreshId();
-    if (objectId == null) {
-      addFeature(accuracy, heading, speed, mapPoint_2154);
-    } else {
-      updateFeature(accuracy, heading, speed, mapPoint_2154);
-    }
+    ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
   }
 
+/*  
   // Permet de mettre a jour localement la position et le type de ma feature
   function updateLocalFeatureGeometry(x, y) {
     var features = vectorSource.getFeatures();
@@ -400,7 +403,7 @@
       if (features[i].get('neo_id') == ouser.id) {
         refreshId();
         features[i].setGeometry(new ol.geom.Point([x, y]));
-        features[i].set('type', type);
+        features[i].set('type', ouser.type);
         vectorSource.refresh();
         return;
       }
@@ -409,12 +412,12 @@
     var feat = new ol.Feature({geometry: point});
     feat.set('color', 'red');
     feat.set('neo_id', ouser.id);
-    feat.set('type', type);
+    feat.set('type', ouser.type);
     feat.setStyle(markerStyle);
     vectorSource.addFeature(feat);
     vectorSource.refresh();
   }
-
+*/
   
   /****
    * 
@@ -556,6 +559,7 @@
     ];
   }
 
+/*  
   // Permet d'ajouter un cercle d'incertitude sur la map a partir d'une feature
   // delta : temps depuis la derniere mise a jour de la feature
   function addCircle(feature, delta) {
@@ -577,8 +581,9 @@
     feat.setStyle(circleStyle);
     vectorSource.addFeature(feat);
   }
+*/
 
-
+/*
   // permet d'ajouter un marker sur la map a partir d'une feature
   // delta : temps depuis la derniere mise a jour de la feature
   function addMarker(feature, delta) {
@@ -602,7 +607,7 @@
     feat.setStyle(markerStyle);
     vectorSource.addFeature(feat);
   }
-
+*/
 
   function mphTokmph(speed) {
     return speed * 1.609344;
@@ -647,13 +652,13 @@
 
   // handler du clic sur le bouton creer un evenement
   function handleCreateEvent() {
-    var form = document.getElementById('evenementForm')
+    var form = document.getElementById('evenementForm');
     var titre = form.evtTitre.value;
     var description = form.evtDescription.value;
     if (titre != '') {
-      addEvent(titre, description)
+      addEvent(titre, description);
     } else {
-      showError('Titre non indiqué', 'evtError')
+      showError('Titre non indiqué', 'evtError');
     }
   }
 
@@ -684,7 +689,7 @@
         } else {
           console.log(response);
           showNotification('Évènement '+titre+' créé', 'evtSuccess');
-          var form = document.getElementById('evenementForm')
+          var form = document.getElementById('evenementForm');
           form.evtTitre.value = '';
           form.evtDescription.value = '';
         }

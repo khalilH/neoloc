@@ -1,8 +1,9 @@
+/*  
   const BASE_URL = 'http://plf.poc.plf-sso.ppol.minint.fr/esri';
   const TILE_URL = BASE_URL + '/server/rest/services/PP/FOND_PP_FINAL_512/MapServer';
   //var URL_TEMPLATE = TILE_URL + '/tile/{z}/{y}/{x}';  
   var URL_TEMPLATE = NEOCONFIG.mapServer.template;
-
+*/
   const LAMBERT93 = "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
 
   const SECOND_IN_MILLIS = 1000;
@@ -31,7 +32,7 @@
     0.26458386250105836,
     0.13229193125052918,
     0.06614596562526459
-  ]
+  ];
 /*
   // Indexs Elasticsearch
   const INDEX = 'neo';
@@ -58,8 +59,11 @@
   const _EVENT_AUTHOR = 'evt_author';
   const _EVENT_DESCRIPTION = 'evt_description';
 */
-  var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
+  //var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
+  
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
+  
+  var isGPSReady = false;
   var map, vectorSource;
   var watchID, lastDateQuery = Date.now(), lastDateUpdate = Date.now();
   var allowXHR = true;
@@ -78,8 +82,6 @@
   //utilisateur actif
   var ouser = new User();
   
-
-
 
   // Test du navigateur
   var regexp = /Firefox/;
