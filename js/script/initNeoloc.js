@@ -32,14 +32,15 @@
     0.13229193125052918,
     0.06614596562526459
   ]
-
+/*
   // Indexs Elasticsearch
   const INDEX = 'neo';
 
   // Types Elasticsearch
   const NEO_TYPE = 'tests'
   const EVENT_TYPE = 'events'
-
+*/  
+/*
   // Attributs Elasticsearch
   const _NEO_ID = 'neo_id';
   const _NEO_X = 'neo_x';
@@ -56,7 +57,7 @@
   const _EVENT_Y = 'evt_y';
   const _EVENT_AUTHOR = 'evt_author';
   const _EVENT_DESCRIPTION = 'evt_description';
-
+*/
   var objectId = null, isGPSReady = false, id, type, dateFinVacation = 0;
   // id = identifiantRadio saisi au debut, type = type de vehicule selectionne
   var map, vectorSource;
@@ -68,9 +69,15 @@
   var app = window.app;
 
 
-  var es = new ESManager(NEOCONFIG.es.host, NEOCONFIG.es.index);
+  //manager ElasticSearch
+  var oes = new ESManager(NEOCONFIG.es.host, NEOCONFIG.es.index);
+  //carte
   var omap = new Map();
-  var ofeature = new FeatureManager(es);
+  //manager features
+  var ofeature = new FeatureManager(oes);
+  //utilisateur actif
+  var ouser = new User();
+  
 
 
 

@@ -111,13 +111,21 @@ FeatureManager.prototype.refreshFeatures = function (hits){
 
 };
 
+FeatureManager.prototype.save = function (index, type, user){
 
-
-FeatureManager.prototype.update = function (userID, userType, id, index, type, accuracy, heading, speed, mapPoint){
-
-	var doc = this.createDocument(userID, userType, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
+    if (user.ESid == null) {
+  	  this.add(index, type, user);
+    } else {
+  	  this.update(index, type, user);
+    }
 	
-	var params = this.getUpdateFeatureParams(index, type, id, doc);
+};
+
+FeatureManager.prototype.update = function (index, type, user){
+
+	var doc = this.createDocument(user.id, user.type, user.x, use.y, user.accuracy, user.heading, user.speed, Date.now());
+	
+	var params = this.getUpdateFeatureParams(index, type, user.ESid, doc);
 
 	var onSuccess = function(response, error){
 		console.log("update ok");
@@ -132,9 +140,9 @@ FeatureManager.prototype.update = function (userID, userType, id, index, type, a
 };
 
 
-FeatureManager.prototype.add = function (userID, userType, index, type, accuracy, heading, speed, mapPoint){
+FeatureManager.prototype.add = function (index, type, user){
 
-	var doc = this.createDocument(userID, userType, mapPoint.x, mapPoint.y, accuracy, heading, speed, Date.now());
+	var doc = this.createDocument(user.id, user.type, user.x, use.y, user.accuracy, user.heading, user.speed, Date.now());
 	
 	var params = this.getAddFeatureParams(index, type, doc);
 
