@@ -46,7 +46,8 @@
 
       var this_ = this;
       var handleRecenterMap = function() {
-        recenterMap();
+        omap.recenterMap();
+
       };
       button.addEventListener('click', handleRecenterMap, false);
 
@@ -156,13 +157,13 @@
             } else {
               var feature = response.hits.hits[0];
               ouser.ESid = feature._id; 
-              console.log(ouser.ESid);
+              //console.log(ouser.ESid);
               ouser.x = feature._source.neo_x;
               ouser.y = feature._source.neo_y;              
               ouser.type = feature._source.neo_type;
               refreshInputRadio(ouser.type);
               sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
-              centerMap(ouser.getPoint());
+              omap.centerMap(ouser.getPoint());
             }
 
             // Gestion du click simple sur la carte pour l'initialisation manuelle
@@ -199,7 +200,7 @@
                 }
               }
             });
-            getLocation();              	  
+            omap.initLocation();              	  
       };//fin onSuccess
       
   	  //checher/executer 
@@ -218,7 +219,7 @@
     if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
       //recuperer le filtre de recherche
       var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
-      console.log(searchParams);
+
   	  /**
   	   * callback succes
   	   * @param response //reponse d'ElasticSearch
@@ -331,51 +332,8 @@
     }
   }
 
-  // Methode appelée pour recentrer la carte sur la derniere position connue
-  function recenterMap() {
-    console.log("recenter");
-    var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
-    centerMap(lastPosition);
-  }
+  
 
-  // Recentre la carte sur le point donné en argument
-  function centerMap(center) {
-    map.getView().animate({'center': center, zoom: 11, duration: 750});
-  }
-
-  // Initialisation du service de geolocalisation
-  function getLocation() {
-    watchID = navigator.geolocation.watchPosition(
-      function(position) {
-        if (!isGPSReady) {
-          isGPSReady = true;
-          // desactive le clic sur la carte pour indiquer manuellement sa position
-          closeNotification();
-        }
-        updatePosition(position.coords);
-      },
-      function(error) {
-        closeNotification();
-        showError(error.message);
-      },
-      {maximumAge: 5000, enableHighAccuracy: true}
-    );
-  }
-
-  // Met a jour la position dans l'index ES si et seulement si la derniere
-  // mise a jour n'a pas eu lieu dans les 5 dernieres secondes
-  function updatePosition(coords) {
-    var lat = coords.latitude, lng = coords.longitude, accuracy = coords.accuracy,
-    alt = coords.altitude, heading = coords.heading, speed = coords.speed;
-    // speed est en mph
-    showNotification(lat+", "+lng+" - "+accuracy+"m"); // a supprimer
-    if (Date.now() - lastDateUpdate > 5 * SECOND_IN_MILLIS)  {
-      addFeature_wgs84(lat, lng, accuracy, heading, mphTokmph(speed));
-      lastDateUpdate = Date.now();
-    } else {
-      console.log("too soon");
-    }
-  }
 
   // Utilise proj4js pour la conversion de la lat, lng vers la projection de lambert93
   // Sauvegarde de la dernière position dans sessionStorage
@@ -394,30 +352,7 @@
     ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
   }
 
-/*  
-  // Permet de mettre a jour localement la position et le type de ma feature
-  function updateLocalFeatureGeometry(x, y) {
-    var features = vectorSource.getFeatures();
-    var length = features.length;
-    for (var i = 0; i < length; i++) {
-      if (features[i].get('neo_id') == ouser.id) {
-        refreshId();
-        features[i].setGeometry(new ol.geom.Point([x, y]));
-        features[i].set('type', ouser.type);
-        vectorSource.refresh();
-        return;
-      }
-    }
-    var point = new ol.geom.Point([x, y]);
-    var feat = new ol.Feature({geometry: point});
-    feat.set('color', 'red');
-    feat.set('neo_id', ouser.id);
-    feat.set('type', ouser.type);
-    feat.setStyle(markerStyle);
-    vectorSource.addFeature(feat);
-    vectorSource.refresh();
-  }
-*/
+
   
   /****
    * 
@@ -464,150 +399,7 @@
   }
   
 
-  // Permet de recuperer la couleur de l'image .png a partir d'une couleur
-  function getColor(color) {
-    switch (color) {
-      case 'red':
-      return 'R';
-      break;
-      case 'blue':
-      return 'B';
-      break;
-      case 'green':
-      return 'G';
-      break;
-      default:
-      console.error("getColor : je ne dois pas passer ici "+color);
-    }
-  }
 
-  // Permet de recuperer un code couleur a partir d'une couleur('red'|'green'|'blue')
-  function getColorRGB(color) {
-    switch (color) {
-      case 'red':
-      return '#F00';
-      break;
-      case 'blue':
-      return '#00F';
-      break;
-      case 'green':
-      return '#2EC854';
-      break;
-      default:
-      console.error("getColorRGB : je ne dois pas passer ici "+color);
-    }
-  }
-
-  // Permet de recuperer une couleur rgba a partir d'une couleur
-  function getColorRGBA(color) {
-    switch (color) {
-      case 'red':
-      return 'rgba(255, 0, 0, 0.1)';
-      break;
-      case 'blue':
-      return 'rgba(0, 0, 255, 0.1)';
-      break;
-      case 'green':
-      return 'rgba(0, 255, 0, 0.1)';
-      break;
-      default:
-      console.error("getColorRGBA : je ne dois pas passer ici "+color);
-    }
-  }
-
-  // Fonction de sytle d'un cercle d'incertitude
-  // Permet d'obtenir la bonne couleur d'un cercle d'incertitude
-  function circleStyle() {
-    return [
-      new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: this.get('color'),
-          width: 1
-        }),
-        fill: new ol.style.Fill({
-          color: getColorRGBA(this.get('color'))
-        })
-      })
-    ];
-  }
-
-  // Fonction de style d'un marker
-  // Permet d'obtenir la bonne icone et couleur d'une feature
-  function markerStyle() {
-    var zoom = map.getView().getZoom();
-    var color = this.get('color');
-    var suffixe = getColor(color);
-    var type = this.get('type');
-
-    return [
-      new ol.style.Style({
-        text: new ol.style.Text({
-          font: '14px Calibri',
-          fill: new ol.style.Fill({ color: getColorRGB(color) }),
-          offsetY: -15,
-          stroke: new ol.style.Stroke({
-            color: '#fff', width: 2
-          }),
-          text: zoom > 8 ? this.get('neo_id') : '' // revoir les param de zoom
-        }),
-        image: new ol.style.Icon(({
-          src: zoom < 5 ? 'images/dot'+suffixe+'.png':
-          zoom < 9 ? 'images/'+type+suffixe+'_16.png' :
-          'images/'+type+suffixe+'.png'
-        }))
-      })
-    ];
-  }
-
-/*  
-  // Permet d'ajouter un cercle d'incertitude sur la map a partir d'une feature
-  // delta : temps depuis la derniere mise a jour de la feature
-  function addCircle(feature, delta) {
-    var neo_id = feature._source.neo_id;
-    var radius = feature._source.neo_accur;
-    var x = feature._source.neo_x;
-    var y = feature._source.neo_y;
-    var circle = new ol.geom.Circle([x, y], radius);
-    var feat = new ol.Feature({geometry: circle});
-    if (neo_id == ouser.id) {
-      feat.set('color', 'red');
-    } else {
-      if (delta > 5 * MINUTE_IN_MILLIS) {
-        feat.set('color', 'blue');
-      } else {
-        feat.set('color', 'green');
-      }
-    }
-    feat.setStyle(circleStyle);
-    vectorSource.addFeature(feat);
-  }
-*/
-
-/*
-  // permet d'ajouter un marker sur la map a partir d'une feature
-  // delta : temps depuis la derniere mise a jour de la feature
-  function addMarker(feature, delta) {
-    var neo_id = feature._source.neo_id;
-    var x = feature._source.neo_x;
-    var y = feature._source.neo_y;
-    var neo_type = feature._source.neo_type;
-    var point = new ol.geom.Point([x, y]);
-    var feat = new ol.Feature({geometry: point});
-    if (neo_id == ouser.id) {
-      feat.set('color', 'red');
-    } else {
-      if (delta > 5 * MINUTE_IN_MILLIS) {
-        feat.set('color', 'blue');
-      } else {
-        feat.set('color', 'green');
-      }
-    }
-    feat.set('neo_id', neo_id);
-    feat.set('type', neo_type);
-    feat.setStyle(markerStyle);
-    vectorSource.addFeature(feat);
-  }
-*/
 
   function mphTokmph(speed) {
     return speed * 1.609344;

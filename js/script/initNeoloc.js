@@ -75,7 +75,7 @@
 
   //manager ElasticSearch
   var oes = new ESManager(NEOCONFIG.es.host, NEOCONFIG.es.index);
-  //carte
+  //actions sur la carte
   var omap = new Map();
   //manager features
   var ofeature = new FeatureManager(oes);

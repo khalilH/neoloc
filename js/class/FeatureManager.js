@@ -43,7 +43,7 @@ FeatureManager.prototype.getFeaturesInMapExtentSearchParams = function (index){
  * 
  */
 FeatureManager.prototype.getFeatureParams = function (index, type, id){
-	console.log(id);
+
 	return {
         index: index,
         type: type,

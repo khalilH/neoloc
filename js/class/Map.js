@@ -29,7 +29,7 @@ Map.prototype.refreshPositions = function (hits){
 		    refreshId();
 		    var i, length = hits.length;
 		    if (length == 0) return;
-		    console.log('refresh');
+		    //console.log('refresh');
 		    vectorSource.clear();
 		    for (i = 0; i < length ; i++) {
 		      var feature = hits[i];
@@ -128,4 +128,61 @@ Map.prototype.addCircle = function(feature, delta) {
   }
   feat.setStyle(circleStyle);
   vectorSource.addFeature(feat);
+};
+
+/** 
+ * Methode appelée pour recentrer la carte sur la derniere position connue 
+ * */
+Map.prototype.recenterMap = function() {	
+	  var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
+
+	  this.centerMap(lastPosition);	  
+};
+
+
+/**
+ * Recentre la carte sur le point donné en argument
+ * @param center
+ */
+Map.prototype.centerMap = function(center) {
+  map.getView().animate({'center': center, zoom: 11, duration: 750});
+};
+
+
+// Initialisation du service de geolocalisation
+Map.prototype.initLocation = function() {	
+	initSelf = this;
+    watchID = navigator.geolocation.watchPosition(
+    function(position) {
+      if (!isGPSReady) {
+        isGPSReady = true;
+        // desactive le clic sur la carte pour indiquer manuellement sa position
+        closeNotification();
+      }
+      initSelf.updatePosition(position.coords);
+
+    },
+    function(error) {
+      closeNotification();
+      showError(error.message);
+    },
+    {maximumAge: 5000, enableHighAccuracy: true}
+  );
+   
+};
+
+
+// Met a jour la position dans l'index ES si et seulement si la derniere
+// mise a jour n'a pas eu lieu dans les 5 dernieres secondes
+Map.prototype.updatePosition = function(coords) {
+  var lat = coords.latitude, lng = coords.longitude, accuracy = coords.accuracy,
+  alt = coords.altitude, heading = coords.heading, speed = coords.speed;
+  // speed est en mph
+  showNotification(lat+", "+lng+" - "+accuracy+"m"); // a supprimer
+  if (Date.now() - lastDateUpdate > 5 * SECOND_IN_MILLIS)  {
+    addFeature_wgs84(lat, lng, accuracy, heading, mphTokmph(speed));
+    lastDateUpdate = Date.now();
+  } else {
+    console.log("too soon");
+  }
 };
