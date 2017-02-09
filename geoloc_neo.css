@@ -199,3 +199,7 @@ input, textarea {
 #myForm {
   text-align: center;
 }
+
+.attribution_perso{
+	font-size: 1rem !important;
+}

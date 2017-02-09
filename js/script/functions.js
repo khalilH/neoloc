@@ -23,6 +23,10 @@
 
     vectorSource = new ol.source.Vector({});
 
+    var neoversion = new ol.Attribution({
+        html: '<div class="attribution_perso">NEOLOC Version '+NEOCONFIG.neoversion+'</div>'
+      });    
+    
     var freepik = new ol.Attribution({
       html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
       ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
@@ -95,7 +99,7 @@
       layers: [
         new ol.layer.Tile({
           source: new ol.source.XYZ({
-            attributions : [freepik, plainicon],
+            attributions : [neoversion, freepik, plainicon],
             tileUrlFunction: function(tileCoord, pixelRatio, projection) {
               var z = tileCoord[0];
               var x = tileCoord[1];
