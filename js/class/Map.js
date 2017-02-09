@@ -88,7 +88,7 @@ Map.prototype.addMarker = function(feature, delta) {
   var neo_type = feature._source.neo_type;
   var point = new ol.geom.Point([x, y]);
   var feat = new ol.Feature({geometry: point});
-  if (neo_id == ouser.id) {
+  if (neo_id == ouserSeek.id) {
     feat.set('color', 'red');
   } else {
     if (delta > 5 * MINUTE_IN_MILLIS) {

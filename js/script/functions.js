@@ -254,13 +254,13 @@
     var _type = form.type.value;
     var _date = document.getElementById('finVacation').value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouser.id = idRadio; 
-      ouser.type = _type; 
+      ouserSeek.id = idRadio; 
+      ouserSeek.type = _type; 
       if (_date != '') {
         var tmp = new Date(_date);
-        ouser.dateFinVac = tmp.getTime();        
+        ouserSeek.dateFinVac = tmp.getTime();        
       } else {
-    	ouser.dateFinVac = 0;
+    	ouserSeek.dateFinVac = 0;
       }
     }
   }
