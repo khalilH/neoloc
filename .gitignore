@@ -1,3 +1,4 @@
+.gitignore
 .settings
 .project
 tests
@@ -6,4 +7,5 @@ elasticsearch
 openlayers
 proj4js
 jquery-3.1.1.min.js
+config_dev.js
 geoloc_neo_ol_old.html
