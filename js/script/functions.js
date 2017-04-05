@@ -23,6 +23,10 @@
 
     vectorSource = new ol.source.Vector({});
 
+    var neoversion = new ol.Attribution({
+        html: '<div class="attribution_perso">NEOLOC Version '+NEOCONFIG.neoversion+'</div>'
+      });    
+    
     var freepik = new ol.Attribution({
       html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
       ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
@@ -95,7 +99,7 @@
       layers: [
         new ol.layer.Tile({
           source: new ol.source.XYZ({
-            attributions : [freepik, plainicon],
+            attributions : [neoversion, freepik, plainicon],
             tileUrlFunction: function(tileCoord, pixelRatio, projection) {
               var z = tileCoord[0];
               var x = tileCoord[1];
@@ -250,13 +254,13 @@
     var _type = form.type.value;
     var _date = document.getElementById('finVacation').value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouser.id = idRadio; 
-      ouser.type = _type; 
+      ouserSeek.id = idRadio; 
+      ouserSeek.type = _type; 
       if (_date != '') {
         var tmp = new Date(_date);
-        ouser.dateFinVac = tmp.getTime();        
+        ouserSeek.dateFinVac = tmp.getTime();        
       } else {
-    	ouser.dateFinVac = 0;
+    	ouserSeek.dateFinVac = 0;
       }
     }
   }

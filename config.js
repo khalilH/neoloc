@@ -9,5 +9,6 @@ var NEOCONFIG = {
 		},
 		mapServer:{
 			template:""			
-		}
+		},
+		neoversion:""
 };
