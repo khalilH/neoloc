@@ -1,5 +1,8 @@
   // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
+
+var tracking = true;
+
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
 
@@ -42,7 +45,7 @@
       ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
     });
 
-    // Ajout des boutons personalises (centerMap + toggleMenu)
+    // Ajout des boutons personalises (centerMap + toggleMenu + autoCenter)
     app.RecenterMap = function(opt_options) {
       var options = opt_options || {};
       var button = document.createElement('button');
@@ -65,6 +68,7 @@
       });
 
     };
+
     app.ToggleMenu = function(opt_options) {
       var options = opt_options || {};
       var button = document.createElement('button');
@@ -86,14 +90,44 @@
       });
 
     };
+
+    app.AutoCenter = function(opt_options) {
+      var options = opt_options || {};
+      var button = document.createElement('button');
+      button.innerHTML = '<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>';
+
+      var this_ = this;
+      var handleAutoCenter = function() {
+          // remettre tracking a true et cacher le bouton d'autoCenter
+          tracking = true;
+          document.getElementById('autoCenterDiv').style.display = "none";
+          omap.recenterMap();
+          // tester le comportement si la carte se recentre directement ?
+      };
+      button.addEventListener('click', handleAutoCenter, false);
+
+      var element = document.createElement('div');
+      element.className = 'autoCenter ol-unselectable ol-control';
+      element.setAttribute("id", "autoCenterDiv")
+      element.appendChild(button);
+
+      ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+      });
+
+    };
+
     ol.inherits(app.RecenterMap, ol.control.Control);
     ol.inherits(app.ToggleMenu, ol.control.Control);
+    ol.inherits(app.AutoCenter, ol.control.Control);
 
     map = new ol.Map({
       controls: ol.control.defaults({
       }).extend([
         new app.RecenterMap(),
-        new app.ToggleMenu()
+        new app.ToggleMenu(),
+        new app.AutoCenter()
       ]),
       target: 'map',
       layers: [
@@ -132,9 +166,16 @@
       getFeaturesInMapExtent();
     });
 
+    // Modification pour le tracking automatique en cas de deplacement de la carte
+    map.on('pointerdrag', function(event) {
+      // mettre tracking a false et afficher le bouton
+      tracking = false;
+      document.getElementById('autoCenterDiv').style.display = "block";
+    });
+
+
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
-    initDateTimePicker();
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
@@ -331,6 +372,11 @@
     var tmp = proj4('EPSG:4326', LAMBERT93, [lng, lat]);
     var lastPosition = JSON.stringify([tmp[0], tmp[1]]);
     sessionStorage.lastPosition = lastPosition;
+    // debut modif tracking automatique
+    if (tracking) {
+      omap.recenterMap();
+    }
+    // fin modif tracking automatique
     var mapPoint_2154 = {'x': tmp[0], 'y': tmp[1]};
     ouser.x = mapPoint_2154.x;
     ouser.y = mapPoint_2154.y;
