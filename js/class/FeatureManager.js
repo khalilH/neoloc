@@ -10,17 +10,17 @@ var FeatureManager = function (es)
 	this._NEO_HEADING = 'neo_heading';
 	this._NEO_SPEED = 'neo_speed';
 	this._NEO_TYPE = 'neo_type';
-	this._NEO_FIN_VACATION = 'neo_fin';	
+	// this._NEO_FIN_VACATION = 'neo_fin';
 };
 
 /**
- * 
+ *
  * @param index //index de recherche
  * @returns Object
  */
 FeatureManager.prototype.getFeaturesInMapExtentSearchParams = function (index){
 	 var geometry = omap.getExtent();
-	 
+
 	 return {
 		        index: index,
 		        body: {
@@ -40,7 +40,7 @@ FeatureManager.prototype.getFeaturesInMapExtentSearchParams = function (index){
 };
 
 /**
- * 
+ *
  */
 FeatureManager.prototype.getFeatureParams = function (index, type, id){
 
@@ -56,7 +56,7 @@ FeatureManager.prototype.getFeatureParams = function (index, type, id){
 
 
 /**
- * 
+ *
  */
 FeatureManager.prototype.getUpdateFeatureParams = function (index, type, id, doc){
 
@@ -71,7 +71,7 @@ FeatureManager.prototype.getUpdateFeatureParams = function (index, type, id, doc
 
 
 /**
- * 
+ *
  */
 FeatureManager.prototype.getAddFeatureParams = function (index, type, doc){
 
@@ -91,17 +91,17 @@ FeatureManager.prototype.save = function (index, type, user){
 
     if (user.ESid == null) {
   	  this.add(index, type, user);
-    } else {    	
+    } else {
   	  this.update(index, type, user);
     }
     //console.log(user);
-	
+
 };
 
 FeatureManager.prototype.update = function (index, type, user){
 
-	var doc = this.createDocument(user.id, user.type, user.dateFinVac, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
-	
+	var doc = this.createDocument(user.id, user.type, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
+
 	var params = this.getUpdateFeatureParams(index, type, user.ESid, doc);
 
 	var onSuccess = function(response, error){
@@ -109,18 +109,18 @@ FeatureManager.prototype.update = function (index, type, user){
         console.log(response);
         if (!allowXHR) {
           allowXHR = true;
-        }		
+        }
 	};
-	
+
 	this.es.indexExec(params, onSuccess, null);
-	
+
 };
 
 
 FeatureManager.prototype.add = function (index, type, user){
 
-	var doc = this.createDocument(user.id, user.type, user.dateFinVac, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
-	
+	var doc = this.createDocument(user.id, user.type, user.x, user.y, user.accuracy, user.heading, user.speed, Date.now());
+
 	var params = this.getAddFeatureParams(index, type, doc);
 
 	var onSuccess = function(response, error){
@@ -129,11 +129,11 @@ FeatureManager.prototype.add = function (index, type, user){
         user.ESid = response._id;
         if (!allowXHR) {
           allowXHR = true;
-        }		
+        }
 	};
-	
+
 	this.es.indexExec(params, onSuccess, null);
-	
+
 };
 
 /**
@@ -148,13 +148,10 @@ FeatureManager.prototype.add = function (index, type, user){
  * @param timestamp
  * @returns Object
  */
-FeatureManager.prototype.createDocument = function (id, type, dateFinVac, x, y, accuracy, heading, speed, timestamp) {
+FeatureManager.prototype.createDocument = function (id, type, x, y, accuracy, heading, speed, timestamp) {
 	  var doc = {};
 	  doc[this._NEO_ID] = id;
 	  doc[this._NEO_TYPE] = type;
-	  if (dateFinVac != 0) {
-	    doc[this._NEO_FIN_VACATION] = dateFinVac;
-	  }
 	  doc[this._NEO_X] = x;
 	  doc[this._NEO_Y] = y;
 	  doc[this._NEO_ACCURACY] = accuracy;

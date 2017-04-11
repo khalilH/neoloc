@@ -25,8 +25,8 @@
 
     var neoversion = new ol.Attribution({
         html: '<div class="attribution_perso">NEOLOC Version '+NEOCONFIG.neoversion+'</div>'
-      });    
-    
+      });
+
     var freepik = new ol.Attribution({
       html: '<div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a>'+
       ' from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>'+
@@ -137,8 +137,8 @@
     initDateTimePicker();
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
-  
-  
+
+
   /**
    * Lancement de l'application en mode user
    */
@@ -146,7 +146,7 @@
     if (navigator.geolocation) {
       openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
       var point;
-      
+
       //recuperer le filtre de recherche
       var searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser.id);
       /**
@@ -160,10 +160,10 @@
               console.log(ouser.id+' non present dans la base');
             } else {
               var feature = response.hits.hits[0];
-              ouser.ESid = feature._id; 
+              ouser.ESid = feature._id;
               //console.log(ouser.ESid);
               ouser.x = feature._source.neo_x;
-              ouser.y = feature._source.neo_y;              
+              ouser.y = feature._source.neo_y;
               ouser.type = feature._source.neo_type;
               refreshInputRadio(ouser.type);
               sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
@@ -204,22 +204,22 @@
                 }
               }
             });
-            omap.initLocation();              	  
+            omap.initLocation();
       };//fin onSuccess
-      
-  	  //checher/executer 
+
+  	  //checher/executer
 	  oes.searchExec(searchParams, onSuccess, null);
     }else{
       showError("Géolocalisation non supportée");
     }
-  }  
-  
-  
+  }
+
+
   /**
    * Permet de recuperer et afficher uniquement les features qui seront visibles sur la carte
    */
   function getFeaturesInMapExtent() {
-	  
+
     if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
       //recuperer le filtre de recherche
       var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
@@ -237,35 +237,28 @@
   	          if (allowXHR) {
   	            allowXHR = false;
   	          }
-  	      }  		  
+  	      }
   	  };
-  	  //checher/executer 
+  	  //checher/executer
 	  oes.searchExec(searchParams, onSuccess, null);
 
     }else{
-    	  console.log('TOO SOON - getFeaturesInMapExtent');    	  
-    }	  
-  }  
-  
-  
-  // permet de mettre a jour le type, l'idRadio ete la date/heure de fin de vacation
-  function refreshId() {   
-    var idRadio = form.idRadio.value;
-    var _type = form.type.value;
-    var _date = document.getElementById('finVacation').value;
-    if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouserSeek.id = idRadio; 
-      ouserSeek.type = _type; 
-      if (_date != '') {
-        var tmp = new Date(_date);
-        ouserSeek.dateFinVac = tmp.getTime();        
-      } else {
-    	ouserSeek.dateFinVac = 0;
-      }
+    	  console.log('TOO SOON - getFeaturesInMapExtent');
     }
   }
-  
-  
+
+
+  // permet de mettre a jour le type, l'idRadio
+  function refreshId() {
+    var idRadio = form.idRadio.value;
+    var _type = form.type.value;
+    if (idRadio != '0000' && idRadio != '' && _type != '') {
+      ouserSeek.id = idRadio;
+      ouserSeek.type = _type;
+    }
+  }
+
+
   // Permet de mettre automatiquement a jour le type du vehicule sur le formulaire
   function refreshInputRadio(neo_type) {
     switch (neo_type) {
@@ -285,23 +278,15 @@
       console.error("je ne dois pas passer ici "+neo_type);
     }
   }
-  
+
   // Saisie de l'identifiant Radio
-  function login() {	
+  function login() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
-    var _date = document.getElementById('finVacation').value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
       ouser.clean();
-      ouser.id = idRadio; 
-      ouser.type = _type; 
-      if (_date != '') {
-        var tmp = new Date(_date);
-        ouser.dateFinVac = tmp.getTime();        
-      }
-      else {
-    	ouser.dateFinVac = 0;
-      }
+      ouser.id = idRadio;
+      ouser.type = _type;
       $('#goButton').attr('disabled', 'disabled');
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
@@ -318,8 +303,8 @@
   function startAdminMode() {
 
   }
-  
-  
+
+
   // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
   function toggleMenu() {
     if (isMenuVisible) {
@@ -336,7 +321,7 @@
     }
   }
 
-  
+
 
 
   // Utilise proj4js pour la conversion de la lat, lng vers la projection de lambert93
@@ -357,14 +342,14 @@
   }
 
 
-  
+
   /****
-   * 
-   * 
+   *
+   *
    * 	OUTILS
-   * 
+   *
    */
-  
+
   // permet d'activer ou non le focus lorsque l'utilisateur veut rentrer une date
   function initDateTimePicker() {
     // code specifique au S5 (height > 640), attention en cas de changement de materiel
@@ -401,7 +386,7 @@
       $('#'+name)[0].hidden = true;
     }
   }
-  
+
 
 
 
