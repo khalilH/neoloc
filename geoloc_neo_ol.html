@@ -93,6 +93,113 @@
           </div>
 		   -->
 
+       <li onclick="toggle('equipageDiv')"><a href="#">Équipage</a></li>
+       <div id="equipageDiv">
+         <div class="row">
+           <form id="equipageForm" onsubmit="return false;">
+             <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+               <span id="equipageError" class="label label-danger" style="display:none;">erreur</span>
+               <div class="form-group col-xs-offset-3 col-sm-offset-3">
+                 <label class="radio-inline">
+                   <input type="checkbox" name="chefDeBord">
+                   Chef de bord
+                 </label>
+               </div>
+               <label class="">Composition</label>
+               <div class="">
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+1">
+                     0+1
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+2">
+                     0+2
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+3">
+                     0+3
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+4">
+                     0+4
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+1">
+                     1+1
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+2">
+                     1+2
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+3">
+                     1+3
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+4">
+                     1+4
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-12 col-sm-12">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="presenceFemme">
+                     Présence d'une femme
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-12 col-sm-12">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="presenceHorsPolice">
+                     Présence d'un hors police
+                   </label>
+                 </div>
+               </div>
+               <label class="">Equipements disponibles</label>
+               <div class="row">
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="equipementAssaut" value="assaut">
+                     Equipement d'assaut
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="grenades" value="grenades">
+                     Grenades à main
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="TASER" value="taser">
+                     Taser
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="LBD" value="lbd">
+                     LBD
+                   </label>
+                 </div>
+               </div>
+             </div>
+           </form>
+         </div>
+       </div>
+
           <!-- Exemple de sous-menu  -->
           <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
           <div class="row">
