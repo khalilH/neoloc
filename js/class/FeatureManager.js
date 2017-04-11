@@ -10,7 +10,6 @@ var FeatureManager = function (es)
 	this._NEO_HEADING = 'neo_heading';
 	this._NEO_SPEED = 'neo_speed';
 	this._NEO_TYPE = 'neo_type';
-	// this._NEO_FIN_VACATION = 'neo_fin';
 };
 
 /**
