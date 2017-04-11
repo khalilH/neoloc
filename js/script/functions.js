@@ -1,18 +1,67 @@
   // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
 
-var tracking = true;
-const INDICATIF_RADIO = "INDICATIF_RADIO";
+  var tracking = true;
+  const INDICATIF_RADIO = "INDICATIF_RADIO";
 
-window.addEventListener("load", function() {
-  var tmp = localStorage.getItem(INDICATIF_RADIO);
-  if (tmp != null) {
-    document.getElementById("indicatifRadioInput").value = tmp;
-    console.log(tmp+" recupere dans le localStorage");
-  } else {
-    console.log("rien dans le localStorage");
-  }
-});
+  window.addEventListener("load", function() {
+    var equipageForm = document.getElementById('equipageForm');
+    var tmp = localStorage.getItem(INDICATIF_RADIO);
+    if (tmp != null) {
+      document.getElementById("indicatifRadioInput").value = tmp;
+      console.log(tmp+" recupere dans le localStorage");
+    } else {
+      console.log("rien dans le localStorage");
+    }
+
+    tmp = localStorage.getItem(CHEF_DE_BORD);
+    if (tmp != null) {
+      if (tmp == "false") {
+        equipageForm.chefDeBord.checked = false;
+      }
+      else {
+        equipageForm.chefDeBord.checked = true;
+      }
+      console.log("chef de bord = "+tmp);
+    } else {
+      console.log("chef de bord non trouve dans LS");
+    }
+
+    tmp = localStorage.getItem(FEMME);
+    if (tmp != null) {
+      if (tmp == "false") {
+        equipageForm.presenceFemme.checked = false;
+      }
+      else {
+        equipageForm.presenceFemme.checked = true;
+      }
+      console.log("presenceFemme = "+tmp);
+    } else {
+      console.log("presenceFemme non trouve dans LS");
+    }
+
+    tmp = localStorage.getItem(HORS_POLICE);
+    if (tmp != null) {
+      if (tmp == "false") {
+        equipageForm.presenceHorsPolice.checked = false;
+      }
+      else {
+        equipageForm.presenceHorsPolice.checked = true;
+      }
+      console.log("chef de bord = "+tmp);
+    } else {
+      console.log("chef de bord non trouve dans LS");
+    }
+
+    tmp = localStorage.getItem(COMPOSITION);
+    if (tmp != null) {
+      equipageForm.compositionEquipage.value = tmp;
+      console.log("compositionEquipage = "+tmp);
+    } else {
+      console.log("compositionEquipage non trouve dans LS");
+    }
+
+  });
 
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
@@ -337,14 +386,7 @@ window.addEventListener("load", function() {
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
       // Memorisation des saisies (seulement de l'indicatif radio pour l'instant)
-      if (localStorage.getItem(INDICATIF_RADIO) == null) {
-        localStorage.setItem(INDICATIF_RADIO, idRadio);
-        console.log("creation dans LS");
-      } else {
-        localStorage.removeItem(INDICATIF_RADIO);
-        localStorage.setItem(INDICATIF_RADIO, idRadio);
-        console.log("update dans LS");
-      }
+      memoriserSaisies();
       ouser.clean();
       ouser.id = idRadio;
       ouser.type = _type;
@@ -358,6 +400,64 @@ window.addEventListener("load", function() {
     }
   }
 
+
+  const CHEF_DE_BORD = "CHEF_DE_BORD";
+  const COMPOSITION = "COMPOSITION";
+  const FEMME = "FEMME";
+  const HORS_POLICE = "HORS_POLICE"
+
+  // Permet de memoriser les saisies
+  function memoriserSaisies() {
+    // ne pas dupliquer le code quand tout sera ok (!= null remove )
+
+    if (localStorage.getItem(INDICATIF_RADIO) == null) {
+      localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
+      console.log("localStorage -> creation INDICATIF_RADIO");
+    } else {
+      localStorage.removeItem(INDICATIF_RADIO);
+      localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
+      console.log("localStorage -> update INDICATIF_RADIO");
+    }
+
+    var equipementForm = document.getElementById('equipageForm');
+
+    if (localStorage.getItem(CHEF_DE_BORD) == null) {
+      localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
+      console.log("localStorage -> creation chef de bord avec "+equipementForm.chefDeBord.checked);
+    } else {
+      localStorage.removeItem(CHEF_DE_BORD)
+      localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
+      console.log("localStorage -> update chef de bord avec "+equipementForm.chefDeBord.checked);
+    }
+
+    if (localStorage.getItem(COMPOSITION) == null) {
+      localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
+      console.log("localStorage -> creation chef de bord avec "+equipementForm.compositionEquipage.value);
+    } else {
+      localStorage.removeItem(COMPOSITION)
+      localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
+      console.log("localStorage -> update chef de bord avec "+equipementForm.compositionEquipage.value);
+    }
+
+    if (localStorage.getItem(FEMME) == null) {
+      localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
+      console.log("localStorage -> creation chef de bord avec "+equipementForm.presenceFemme.checked);
+    } else {
+      localStorage.removeItem(FEMME)
+      localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
+      console.log("localStorage -> update chef de bord avec "+equipementForm.presenceFemme.checked);
+    }
+
+    if (localStorage.getItem(HORS_POLICE) == null) {
+      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
+      console.log("localStorage -> creation chef de bord avec "+equipementForm.presenceHorsPolice.checked);
+    } else {
+      localStorage.removeItem(HORS_POLICE)
+      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
+      console.log("localStorage -> update chef de bord avec "+equipementForm.presenceHorsPolice.checked);
+    }
+
+  }
 
 
   // Lancement de l'application en mode salle de commandement
