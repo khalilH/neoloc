@@ -2,6 +2,17 @@
   // + Gestion des events (singleclick et moveend)
 
 var tracking = true;
+const INDICATIF_RADIO = "INDICATIF_RADIO";
+
+window.addEventListener("load", function() {
+  var tmp = localStorage.getItem(INDICATIF_RADIO);
+  if (tmp != null) {
+    document.getElementById("indicatifRadioInput").value = tmp;
+    console.log(tmp+" recupere dans le localStorage");
+  } else {
+    console.log("rien dans le localStorage");
+  }
+});
 
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
@@ -325,6 +336,15 @@ var tracking = true;
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
+      // Memorisation des saisies (seulement de l'indicatif radio pour l'instant)
+      if (localStorage.getItem(INDICATIF_RADIO) == null) {
+        localStorage.setItem(INDICATIF_RADIO, idRadio);
+        console.log("creation dans LS");
+      } else {
+        localStorage.removeItem(INDICATIF_RADIO);
+        localStorage.setItem(INDICATIF_RADIO, idRadio);
+        console.log("update dans LS");
+      }
       ouser.clean();
       ouser.id = idRadio;
       ouser.type = _type;
