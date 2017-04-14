@@ -161,7 +161,7 @@
           // remettre tracking a true et cacher le bouton d'autoCenter
           tracking = true;
           document.getElementById('autoCenterDiv').style.display = "none";
-          omap.recenterMap();
+          omap.recenterMapWithZoom();
           // tester le comportement si la carte se recentre directement ?
       };
       button.addEventListener('click', handleAutoCenter, false);
@@ -268,7 +268,7 @@
               ouser.type = feature._source.neo_type;
               refreshInputRadio(ouser.type);
               sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
-              omap.centerMap(ouser.getPoint());
+              omap.centerMapWithZoom(ouser.getPoint());
             }
 
             // Gestion du click simple sur la carte pour l'initialisation manuelle

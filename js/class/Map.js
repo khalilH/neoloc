@@ -7,7 +7,7 @@ var Map = function ()
  * Permet d'obtenir les limites(extent) de la vue active de la carte en projection de lambert93
  */
 Map.prototype.getExtent = function ()
-{		
+{
 	    var e = map.getView().calculateExtent(map.getSize());
 	    var extent = {
 	      'xmin': e[0],
@@ -15,7 +15,7 @@ Map.prototype.getExtent = function ()
 	      'xmax': e[2],
 	      'ymax': e[3]
 	    };
-	    return extent;	  	
+	    return extent;
 
 };
 
@@ -77,7 +77,7 @@ Map.prototype.updateLocalFeatureGeometry = function(x, y) {
 
 /**
  * permet d'ajouter un marker sur la map a partir d'une feature
- * 
+ *
  * @param feature
  * @param delta  //temps depuis la derniere mise a jour de la feature
  */
@@ -106,7 +106,7 @@ Map.prototype.addMarker = function(feature, delta) {
 
 /**
  * Permet d'ajouter un cercle d'incertitude sur la map a partir d'une feature
- * 
+ *
  * @param feature
  * @param delta  //temps depuis la derniere mise a jour de la feature
  */
@@ -130,27 +130,39 @@ Map.prototype.addCircle = function(feature, delta) {
   vectorSource.addFeature(feat);
 };
 
-/** 
- * Methode appelée pour recentrer la carte sur la derniere position connue 
+/**
+ * Methode appelée pour recentrer la carte sur la derniere position connue
  * */
-Map.prototype.recenterMap = function() {	
+Map.prototype.recenterMap = function() {
 	  var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
-
-	  this.centerMap(lastPosition);	  
+	  this.centerMap(lastPosition);
 };
 
+
+Map.prototype.recenterMapWithZoom = function() {
+	var lastPosition = JSON.parse(sessionStorage.lastPosition); // [x,y] en lambert93
+	this.centerMapWithZoom(lastPosition);
+}
 
 /**
  * Recentre la carte sur le point donné en argument
  * @param center
  */
 Map.prototype.centerMap = function(center) {
+  map.getView().animate({'center': center, duration: 750});
+};
+
+/**
+ * Recentre la carte sur le point donné en argument avec le zoom
+ * @param center
+ */
+Map.prototype.centerMapWithZoom = function(center) {
   map.getView().animate({'center': center, zoom: 11, duration: 750});
 };
 
 
 // Initialisation du service de geolocalisation
-Map.prototype.initLocation = function() {	
+Map.prototype.initLocation = function() {
 	initSelf = this;
     watchID = navigator.geolocation.watchPosition(
     function(position) {
@@ -168,7 +180,7 @@ Map.prototype.initLocation = function() {
     },
     {maximumAge: 5000, enableHighAccuracy: true}
   );
-   
+
 };
 
 
