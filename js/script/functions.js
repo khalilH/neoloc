@@ -294,6 +294,7 @@
                 	  lastDateUpdate = Date.now();
                   }
                   omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+                  omap.centerMap(ouser.getPoint());
                   sessionStorage.lastPosition = JSON.stringify(coordinates);
                 }
               }
@@ -347,8 +348,8 @@
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouser.id = idRadio;
-      ouser.type = _type;
+      ouserSeek.id = idRadio;
+      ouserSeek.type = _type;
     }
   }
 
