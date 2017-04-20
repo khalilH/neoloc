@@ -5,6 +5,8 @@
   const INDICATIF_RADIO = "INDICATIF_RADIO";
 
   window.addEventListener("load", function() {
+
+    // Recuperation des champs de saisies memorises ----> DEBUT
     var equipageForm = document.getElementById('equipageForm');
     var tmp = localStorage.getItem(INDICATIF_RADIO);
     if (tmp != null) {
@@ -60,6 +62,7 @@
     } else {
       console.log("compositionEquipage non trouve dans LS");
     }
+    // Recuperation des champs de saisie TERMINEE <----
 
   });
 
@@ -354,8 +357,8 @@
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouserSeek.id = idRadio;
-      ouserSeek.type = _type;
+      ouser.id = idRadio;
+      ouser.type = _type;
     }
   }
 
