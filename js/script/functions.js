@@ -7,7 +7,7 @@
   window.addEventListener("load", function() {
 
     // Recuperation des champs de saisies memorises ----> DEBUT
-    var equipageForm = document.getElementById('equipageForm');
+    equipageForm = document.getElementById('equipageForm');
     var tmp = localStorage.getItem(INDICATIF_RADIO);
     if (tmp != null) {
       document.getElementById("indicatifRadioInput").value = tmp;
@@ -229,6 +229,7 @@
 
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
+    equipageForm.chefDeBord.removeAttribute('disabled');
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
@@ -388,6 +389,15 @@
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
       $('#goButton').addClass('btn-danger');
+      // Check si la case chef de bord est cochee
+      if (equipageForm.chefDeBord.checked) {
+        document.getElementById("validerModifsBtn").style.display = 'inline';
+        equipageForm.chefDeBord.disabled = true;
+        // creer equipage dans elasticsearch / rejoindre equipage
+      } else {
+        equipageForm.chefDeBord.parentNode.style.display = 'none';
+      }
+      
       startUserMode();
     } else {
       showError('Identifiant radio non indiqué', 'idError');

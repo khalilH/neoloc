@@ -4,11 +4,11 @@ var NEOCONFIG = {
 			index:"neo",
 			type:{
 				neo:"tests",
-				event:"event"
+				equipage:"equipages"
 			}
 		},
 		mapServer:{
-			template:"http://plf.poc.plf-sso.ppol.minint.fr/esri/public/rest/services/PP/FOND_PP_FINAL_512/MapServer/tile/{z}/{y}/{x}"			
+			template:"http://plf.poc.plf-sso.ppol.minint.fr/esri/public/rest/services/PP/FOND_PP_FINAL_512/MapServer/tile/{z}/{y}/{x}"
 		},
 		neoversion:"1.1"
 };
