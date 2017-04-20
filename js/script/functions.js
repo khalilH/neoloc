@@ -12,8 +12,6 @@
     if (tmp != null) {
       document.getElementById("indicatifRadioInput").value = tmp;
       console.log(tmp+" recupere dans le localStorage");
-    } else {
-      console.log("rien dans le localStorage");
     }
 
     tmp = localStorage.getItem(CHEF_DE_BORD);
@@ -25,8 +23,6 @@
         equipageForm.chefDeBord.checked = true;
       }
       console.log("chef de bord = "+tmp);
-    } else {
-      console.log("chef de bord non trouve dans LS");
     }
 
     tmp = localStorage.getItem(FEMME);
@@ -38,8 +34,6 @@
         equipageForm.presenceFemme.checked = true;
       }
       console.log("presenceFemme = "+tmp);
-    } else {
-      console.log("presenceFemme non trouve dans LS");
     }
 
     tmp = localStorage.getItem(HORS_POLICE);
@@ -51,16 +45,12 @@
         equipageForm.presenceHorsPolice.checked = true;
       }
       console.log("chef de bord = "+tmp);
-    } else {
-      console.log("chef de bord non trouve dans LS");
     }
 
     tmp = localStorage.getItem(COMPOSITION);
     if (tmp != null) {
       equipageForm.compositionEquipage.value = tmp;
       console.log("compositionEquipage = "+tmp);
-    } else {
-      console.log("compositionEquipage non trouve dans LS");
     }
     // Recuperation des champs de saisie TERMINEE <----
 
@@ -411,54 +401,34 @@
 
   // Permet de memoriser les saisies
   function memoriserSaisies() {
-    // ne pas dupliquer le code quand tout sera ok (!= null remove )
 
-    if (localStorage.getItem(INDICATIF_RADIO) == null) {
-      localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
-      console.log("localStorage -> creation INDICATIF_RADIO");
-    } else {
+    if (localStorage.getItem(INDICATIF_RADIO) != null) {
       localStorage.removeItem(INDICATIF_RADIO);
-      localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
-      console.log("localStorage -> update INDICATIF_RADIO");
     }
+    localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
 
     var equipementForm = document.getElementById('equipageForm');
 
-    if (localStorage.getItem(CHEF_DE_BORD) == null) {
-      localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
-      console.log("localStorage -> creation chef de bord avec "+equipementForm.chefDeBord.checked);
-    } else {
+    if (localStorage.getItem(CHEF_DE_BORD) != null) {
       localStorage.removeItem(CHEF_DE_BORD)
+    }
       localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
-      console.log("localStorage -> update chef de bord avec "+equipementForm.chefDeBord.checked);
-    }
 
-    if (localStorage.getItem(COMPOSITION) == null) {
-      localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
-      console.log("localStorage -> creation chef de bord avec "+equipementForm.compositionEquipage.value);
-    } else {
+
+    if (localStorage.getItem(COMPOSITION) != null) {
       localStorage.removeItem(COMPOSITION)
+    }
       localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
-      console.log("localStorage -> update chef de bord avec "+equipementForm.compositionEquipage.value);
-    }
 
-    if (localStorage.getItem(FEMME) == null) {
-      localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
-      console.log("localStorage -> creation chef de bord avec "+equipementForm.presenceFemme.checked);
-    } else {
+    if (localStorage.getItem(FEMME) != null) {
       localStorage.removeItem(FEMME)
+    }
       localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
-      console.log("localStorage -> update chef de bord avec "+equipementForm.presenceFemme.checked);
-    }
 
-    if (localStorage.getItem(HORS_POLICE) == null) {
-      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
-      console.log("localStorage -> creation chef de bord avec "+equipementForm.presenceHorsPolice.checked);
-    } else {
+    if (localStorage.getItem(HORS_POLICE) != null) {
       localStorage.removeItem(HORS_POLICE)
-      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
-      console.log("localStorage -> update chef de bord avec "+equipementForm.presenceHorsPolice.checked);
     }
+      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
 
   }
 
