@@ -412,32 +412,23 @@
     if (localStorage.getItem(CHEF_DE_BORD) != null) {
       localStorage.removeItem(CHEF_DE_BORD)
     }
-      localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
-
+    localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
 
     if (localStorage.getItem(COMPOSITION) != null) {
       localStorage.removeItem(COMPOSITION)
     }
-      localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
+    localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
 
     if (localStorage.getItem(FEMME) != null) {
       localStorage.removeItem(FEMME)
     }
-      localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
+    localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
 
     if (localStorage.getItem(HORS_POLICE) != null) {
       localStorage.removeItem(HORS_POLICE)
     }
-      localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
-
+    localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
   }
-
-
-  // Lancement de l'application en mode salle de commandement
-  function startAdminMode() {
-
-  }
-
 
   // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
   function toggleMenu() {
