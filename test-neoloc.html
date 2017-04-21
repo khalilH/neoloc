@@ -7,28 +7,27 @@
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
 </head>
 <body>
+  robotoz
   <input id="saisie" type="text" name="indicatif">
-  <div id='response' style='color:green;'>
+  <div id='error' style='color:red;'>
 
   </div>
-  <div id='error' style='color:red;'>
+  <div id='response' style='color:green;'>
 
   </div>
 
   <script type="text/javascript">
     var input = document.getElementById('saisie');
 
-    input.addEventListener('input', function(event) {
-      console.log("input "+event);
-    })
+    var lastLength = input.value.length;
 
-
-    input.addEventListener('keydown', function(event) {
-      console.log("keydown"+event);
-    })
 
     input.addEventListener('keyup', function(event) {
-      console.log("keyup"+event);
+      var regexp = /[a-zA-Z0-9]/;
+      if(!regexp.test(event.key)) {
+        var length = input.value.length;
+          input.value = input.value.slice(0, length-1);
+      }
     })
 
   </script>

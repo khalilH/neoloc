@@ -60,6 +60,15 @@
       showNotification("Mise a jour de votre équipage", "equipageSuccess");
     });
 
+    var indicatifRadioInput = document.getElementById('indicatifRadioInput');
+    input.addEventListener('keyup', function(event) {
+      var regexp = /[a-zA-Z0-9]/;
+      if(!regexp.test(event.key)) {
+        var length = input.value.length;
+          input.value = input.value.slice(0, length-1);
+      }
+    });
+
   });
 
   function initMap() {
