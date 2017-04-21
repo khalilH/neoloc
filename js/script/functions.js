@@ -64,8 +64,8 @@
     indicatifRadioInput.addEventListener('keyup', function(event) {
       var regexp = /[a-zA-Z0-9]/;
       if(!regexp.test(event.key)) {
-        var length = input.value.length;
-          input.value = input.value.slice(0, length-1);
+        var length = indicatifRadioInput.value.length;
+          indicatifRadioInput.value = indicatifRadioInput.value.slice(0, length-1);
       }
     });
 
