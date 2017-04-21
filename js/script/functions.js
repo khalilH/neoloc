@@ -69,6 +69,19 @@
       }
     });
 
+
+    // Orientation de la tablette
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', deviceOrientationHandler, false);
+      showNotification("DeviceOrientation available", "idInfo")
+    }
+
+    function deviceOrientationHandler(eventData) {
+      if (tracking) {
+        map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
+      }
+    }
+
   });
 
   function initMap() {
@@ -627,7 +640,9 @@
   }
 
 
-
+  function degreeToRad(angle) {
+    return Math.PI * angle / 180;
+  }
 
   function mphTokmph(speed) {
     return speed * 1.609344;
