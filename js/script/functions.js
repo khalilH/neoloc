@@ -375,6 +375,32 @@
     }
   }
 
+  function remplirEquipage(form, indicatif, _id) {
+    // Remplissage de l'objet Equipage
+    if (_id != undefined) {
+      oequipage.ESid = _id;
+    }
+    oequipage.id = indicatif;
+    oequipage.composition = form.compositionEquipage.value;
+    oequipage.femme = form.presenceFemme.checked;
+    oequipage.hors_police = form.presenceHorsPolice.checked;
+    oequipage.date_creation = Date.now();
+    if (form.equipementAssaut.checked) {
+        oequipage.equipements.push(form.equipementAssaut.value);
+    }
+    if (form.grenades.checked) {
+        oequipage.equipements.push(form.grenades.value);
+    }
+    if (form.taser.checked) {
+        oequipage.equipements.push(form.taser.value);
+    }
+    if (form.lbd.checked) {
+        oequipage.equipements.push(form.lbd.value);
+    }
+    // Fin du remplissage de l'objet equipage
+    oequipageManager.save(NEOCONFIG.es.index, oequipage);
+  }
+
   // Saisie de l'identifiant Radio
   function login() {
     var idRadio = form.idRadio.value;
@@ -389,16 +415,66 @@
       $('#goButton').addClass('disabled');
       $('#goButton').removeClass('btn-info');
       $('#goButton').addClass('btn-danger');
-      // Check si la case chef de bord est cochee
+
+      // Traitement si la case chef de bord est coche
       if (equipageForm.chefDeBord.checked) {
         document.getElementById("validerModifsBtn").style.display = 'inline';
         equipageForm.chefDeBord.disabled = true;
-        // creer equipage dans elasticsearch / rejoindre equipage
+        // Chercher si un equipage avec le meme indicatif existe et verifier sa date de creation
+        var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
+
+        var onSuccess = function(response, error) {
+          if (error != undefined) {
+            console.error(error);
+          } else if (response.hits.total == 0) {
+            // Equipage non present dans ES, creation possible
+              console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
+              remplirEquipage(equipageForm, idRadio);
+              startUserMode();
+          } else {
+            var equipageResult = response.hits.hits[0];
+            var timestamp = equipageResult._source.equipage_date_creation;
+            var _id = equipageResult._id;
+            if (Date.now() - timestamp < 6 * HOUR_IN_MILLIS) {
+              // L'equipage est recent, mise a jour non possible, pas de geoloc
+              console.log("Creation d'equipage non possible");
+              showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
+            } else {
+              console.log("Creation d'equipage possible")
+              remplirEquipage(equipageForm, idRadio, ESid);
+              startUserMode();
+            }
+          }
+        }
+
+        oes.searchExec(searchParams, onSuccess, null);
+
       } else {
-        equipageForm.chefDeBord.parentNode.style.display = 'none';
+        equipageForm.chefDeBord.parentNode.disabled = true;
+        var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
+
+        var onSuccess = function(response, error) {
+          if (error != undefined) {
+            console.error(error);
+          } else if (response.hits.total == 0) {
+            // Equipage non present dans ES, lancement geoloc
+            console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
+            startUserMode();
+          } else {
+            var equipageResult = response.hits.hits[0];
+            var timestamp = equipageResult._source.equipage_date_creation;
+            var indicatif = equipageResult._source.equipage_id;
+            showNotification("Vous rejoingnez l'equipage : "+indicatif, "equipageInfo");
+            showNotification("Geolocalisation desactivee", "equipageInfo");
+            console.log("Chef de bord non coche -> je rejoins l'equipage "+indicatif+" , geoloc desactivee");
+          }
+        }
+
+        oes.searchExec(searchParams, onSuccess, null);
       }
-      
-      startUserMode();
+
+      // Lancement de la geoloc sans les equipage
+      // startUserMode();
     } else {
       showError('Identifiant radio non indiqué', 'idError');
     }

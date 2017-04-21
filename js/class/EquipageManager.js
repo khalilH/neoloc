@@ -20,24 +20,24 @@ EquipageManager.prototype.getEquipageParams = function(index, id) {
   };
 };
 
-Equipage.prototype.getUpdateEquipageParams = function (index, id, doc) {
+EquipageManager.prototype.getUpdateEquipageParams = function (index, id, doc) {
   return {
     index: index,
-    type: NEOCONFIG.es.type.equipages,
+    type: NEOCONFIG.es.type.equipage,
     id: id,
     body: doc
   };
 };
 
-Equipage.prototype.getCreateEquipageParams = function (index, doc) {
+EquipageManager.prototype.getCreateEquipageParams = function (index, doc) {
   return {
     index: index,
-    type: NEOCONFIG.es.type.equipages,
+    type: NEOCONFIG.es.type.equipage,
     body: doc
   };
 };
 
-Equipage.prototype.save = function (index, equipage) {
+EquipageManager.prototype.save = function (index, equipage) {
   if (equipage.ESid == null) {
     this.create(index, equipage);
   } else {
@@ -45,7 +45,7 @@ Equipage.prototype.save = function (index, equipage) {
   }
 }
 
-Equipage.prototype.create = function (index, equipage) {
+EquipageManager.prototype.create = function (index, equipage) {
   var doc = this.createDocument(equipage.id, equipage.composition, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
 
   var params = this.getCreateEquipageParams(index, doc);
@@ -55,11 +55,11 @@ Equipage.prototype.create = function (index, equipage) {
     console.log(response);
     equipage.ESid = response._id;
   };
-
+  console.log(params);
   this.es.indexExec(params, onSuccess, null);
 }
 
-Equipage.prototype.update = function (index, equipage) {
+EquipageManager.prototype.update = function (index, equipage) {
   var doc = this.createDocument(equipage.id, equipage.composition, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
 
   var params = this.getUpdateEquipageParams(index, equipage.ESid, doc);
@@ -73,6 +73,7 @@ Equipage.prototype.update = function (index, equipage) {
   this.es.indexExec(params, onSuccess, null);
 };
 
+// atention a la caleur de date_creation
 EquipageManager.prototype.createDocument = function (id, composition, femme, hors_police, equipements, date_creation) {
   var doc = {};
   doc[this._EQUIPAGE_ID] = id;

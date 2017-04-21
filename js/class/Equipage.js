@@ -5,7 +5,7 @@ var Equipage = function()
   this.composition = null;
   this.femme = null;
   this.hors_Police = null;
-  this.equipements = null; // [] array
+  this.equipements = [];
   this.date_creation = null;
 };
 
@@ -15,6 +15,6 @@ Equipage.prototype.clean = function() {
     this.composition = null;
     this.femme = null;
     this.hors_Police = null;
-    this.equipements = null; // [] array
+    this.equipements = [];
     this.date_creation = null;
 };
