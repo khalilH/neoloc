@@ -54,6 +54,12 @@
     }
     // Recuperation des champs de saisie TERMINEE <----
 
+    var validerModifsBtn = document.getElementById("validerModifsBtn");
+    validerModifsBtn.addEventListener('click', function() {
+      refreshEquipage(equipageForm);
+      showNotification("Mise a jour de votre équipage", "equipageSuccess");
+    });
+
   });
 
   function initMap() {
@@ -375,7 +381,27 @@
     }
   }
 
-  function remplirEquipage(form, indicatif, _id) {
+  function refreshEquipage(form) {
+    oequipage.composition = form.compositionEquipage.value;
+    oequipage.femme = form.presenceFemme.checked;
+    oequipage.hors_police = form.presenceHorsPolice.checked;
+    oequipage.equipements = [];
+    if (form.equipementAssaut.checked) {
+        oequipage.equipements.push(form.equipementAssaut.value);
+    }
+    if (form.grenades.checked) {
+        oequipage.equipements.push(form.grenades.value);
+    }
+    if (form.taser.checked) {
+        oequipage.equipements.push(form.taser.value);
+    }
+    if (form.lbd.checked) {
+        oequipage.equipements.push(form.lbd.value);
+    }
+    oequipageManager.save(NEOCONFIG.es.index, oequipage);
+  }
+
+  function createEquipage(form, indicatif, _id) {
     // Remplissage de l'objet Equipage
     if (_id != undefined) {
       oequipage.ESid = _id;
@@ -401,6 +427,13 @@
     oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
+  function disableGoButton() {
+    $('#goButton').attr('disabled', 'disabled');
+    $('#goButton').addClass('disabled');
+    $('#goButton').removeClass('btn-info');
+    $('#goButton').addClass('btn-danger');
+  }
+
   // Saisie de l'identifiant Radio
   function login() {
     var idRadio = form.idRadio.value;
@@ -411,15 +444,8 @@
       ouser.clean();
       ouser.id = idRadio;
       ouser.type = _type;
-      $('#goButton').attr('disabled', 'disabled');
-      $('#goButton').addClass('disabled');
-      $('#goButton').removeClass('btn-info');
-      $('#goButton').addClass('btn-danger');
-
       // Traitement si la case chef de bord est coche
       if (equipageForm.chefDeBord.checked) {
-        document.getElementById("validerModifsBtn").style.display = 'inline';
-        equipageForm.chefDeBord.disabled = true;
         // Chercher si un equipage avec le meme indicatif existe et verifier sa date de creation
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
@@ -429,7 +455,10 @@
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, creation possible
               console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
-              remplirEquipage(equipageForm, idRadio);
+              createEquipage(equipageForm, idRadio);
+              document.getElementById("validerModifsBtn").style.display = 'inline';
+              equipageForm.chefDeBord.disabled = true;
+              disableGoButton();
               startUserMode();
           } else {
             var equipageResult = response.hits.hits[0];
@@ -441,7 +470,10 @@
               showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
             } else {
               console.log("Creation d'equipage possible")
-              remplirEquipage(equipageForm, idRadio, ESid);
+              createEquipage(equipageForm, idRadio, ESid);
+              document.getElementById("validerModifsBtn").style.display = 'inline';
+              equipageForm.chefDeBord.disabled = true;
+              disableGoButton();
               startUserMode();
             }
           }
@@ -450,7 +482,7 @@
         oes.searchExec(searchParams, onSuccess, null);
 
       } else {
-        equipageForm.chefDeBord.parentNode.disabled = true;
+        equipageForm.chefDeBord.disabled = true;
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
         var onSuccess = function(response, error) {
@@ -459,14 +491,15 @@
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, lancement geoloc
             console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
+            disableGoButton();
             startUserMode();
           } else {
             var equipageResult = response.hits.hits[0];
             var timestamp = equipageResult._source.equipage_date_creation;
             var indicatif = equipageResult._source.equipage_id;
-            showNotification("Vous rejoingnez l'equipage : "+indicatif, "equipageInfo");
-            showNotification("Geolocalisation desactivee", "equipageInfo");
+            showNotification("Vous rejoignez un équipage. Géolocalisation désactivée", "equipageInfo");
             console.log("Chef de bord non coche -> je rejoins l'equipage "+indicatif+" , geoloc desactivee");
+            disableGoButton();
           }
         }
 
