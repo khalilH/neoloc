@@ -61,7 +61,8 @@
     });
 
     var indicatifRadioInput = document.getElementById('indicatifRadioInput');
-    input.addEventListener('keyup', function(event) {
+    indicatifRadioInput.addEventListener('keyup', function(event) {
+      alert("sd");
       var regexp = /[a-zA-Z0-9]/;
       if(!regexp.test(event.key)) {
         var length = input.value.length;
