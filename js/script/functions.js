@@ -362,6 +362,9 @@
   // permet de mettre a jour le type, l'idRadio
   function refreshId() {
     var idRadio = form.idRadio.value;
+    var tmp = idRadio.toUpperCase();
+    idRadio = tmp.replace(/\s/g,'');
+    form.idRadio.value = idRadio;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
       ouserSeek.id = idRadio;
@@ -452,6 +455,7 @@
       console.log('before '+idRadio);
       var tmp = idRadio.toUpperCase();
       idRadio = tmp.replace(/\s/g,'');
+      form.idRadio.value = idRadio;
       console.log('after '+idRadio);
       memoriserSaisies();
       ouser.clean();
