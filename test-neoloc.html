@@ -7,6 +7,7 @@
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
 </head>
 <body>
+  <input id="saisie" type="text" name="indicatif">
   <div id='response' style='color:green;'>
 
   </div>
@@ -15,7 +16,21 @@
   </div>
 
   <script type="text/javascript">
-  	console.log(JSON.parse('["toto", "tutu"]'));
+    var input = document.getElementById('saisie');
+
+    input.addEventListener('input', function(event) {
+      console.log("input "+event);
+    })
+
+
+    input.addEventListener('keydown', function(event) {
+      console.log("keydown"+event);
+    })
+
+    input.addEventListener('keyup', function(event) {
+      console.log("keyup"+event);
+    })
+
   </script>
 </body>
 </html>

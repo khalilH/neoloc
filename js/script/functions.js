@@ -440,6 +440,10 @@
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
       // Memorisation des saisies (seulement de l'indicatif radio pour l'instant)
+      console.log('before '+idRadio);
+      var tmp = idRadio.toUpperCase();
+      idRadio = tmp.replace(/\s/g,'');
+      console.log('after '+idRadio);
       memoriserSaisies();
       ouser.clean();
       ouser.id = idRadio;
