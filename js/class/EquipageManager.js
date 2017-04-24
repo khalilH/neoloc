@@ -54,6 +54,8 @@ EquipageManager.prototype.create = function (index, equipage) {
     console.log("ajout equipage ok");
     console.log(response);
     equipage.ESid = response._id;
+    // sauvegarde dans le localStorage de la date de creation et de l'_id
+    equipage.saveInLocalStorage();
   };
   console.log(params);
   this.es.indexExec(params, onSuccess, null);
@@ -68,6 +70,8 @@ EquipageManager.prototype.update = function (index, equipage) {
     console.log("update equipage ok");
     console.log(response);
     equipage.ESid = response._id;
+    // sauvegarde dans le localStorage de la date de creation et de l'_id
+    equipage.saveInLocalStorage();
   };
 
   this.es.indexExec(params, onSuccess, null);

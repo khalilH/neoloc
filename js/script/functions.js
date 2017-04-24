@@ -3,6 +3,8 @@
 
   var tracking = true;
   const INDICATIF_RADIO = "INDICATIF_RADIO";
+  const EQUIPAGE_ES_ID = "EQUIPAGE_ES_ID";
+  const EQUIPAGE_DATE = "EQUIPAGE_DATE";
 
   window.addEventListener("load", function() {
 
@@ -78,7 +80,7 @@
 
     function deviceOrientationHandler(eventData) {
       if (tracking) {
-        map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
+        // map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
       }
     }
 
@@ -490,14 +492,24 @@
               equipageForm.chefDeBord.disabled = true;
               disableGoButton();
               startUserMode();
-          } else {
-            var equipageResult = response.hits.hits[0];
-            var timestamp = equipageResult._source.equipage_date_creation;
-            var _id = equipageResult._id;
-            if (Date.now() - timestamp < 6 * HOUR_IN_MILLIS) {
-              // L'equipage est recent, mise a jour non possible, pas de geoloc
-              console.log("Creation d'equipage non possible");
-              showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
+            } else {
+              var equipageResult = response.hits.hits[0];
+              var timestamp = equipageResult._source.equipage_date_creation;
+              var _id = equipageResult._id;
+              if (Date.now() - timestamp < 6 * HOUR_IN_MILLIS) {
+                var local_id = localStorage.getItem(EQUIPAGE_ES_ID);
+                var local_date = localStorage.getItem(EQUIPAGE_DATE);
+                if (local_id == _id && local_date == timestamp) {
+                  // L'equipage est recent mais je suis celui qui l'a cree donc je pourrai le modifier
+                  document.getElementById("validerModifsBtn").style.display = 'inline';
+                  equipageForm.chefDeBord.disabled = true;
+                  showNotification("Mise a jour possible de l'equipage", "equipageInfo");
+                  disableGoButton();
+                  startUserMode();
+                } else {
+                  // L'equipage est recent, mise a jour non possible, pas de geoloc
+                  showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
+                }
             } else {
               console.log("Creation d'equipage possible")
               createEquipage(equipageForm, idRadio, ESid);
