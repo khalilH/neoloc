@@ -537,6 +537,7 @@
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, lancement geoloc comme dans la version 1.0
             console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
+            document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
             startUserMode();
           } else {
