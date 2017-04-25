@@ -76,17 +76,17 @@
       }
     });
 
-    // Orientation auto de la map avec DeviceOrientationEvent
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', deviceOrientationHandler, false);
-      showNotification("DeviceOrientation available", "idInfo")
-    }
-
-    function deviceOrientationHandler(eventData) {
-      if (tracking) {
-        // map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
-      }
-    }
+    // // Orientation auto de la map avec DeviceOrientationEvent
+    // if (window.DeviceOrientationEvent) {
+    //   window.addEventListener('deviceorientation', deviceOrientationHandler, false);
+    //   showNotification("DeviceOrientation available", "idInfo")
+    // }
+    //
+    // function deviceOrientationHandler(eventData) {
+    //   if (tracking) {
+    //     // map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
+    //   }
+    // }
 
   });
 
@@ -479,7 +479,6 @@
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      // Memorisation des saisies (seulement de l'indicatif radio pour l'instant)
       console.log('before '+idRadio);
       var tmp = idRadio.toUpperCase();
       idRadio = tmp.replace(/\s/g,'');
@@ -549,7 +548,7 @@
             oequipage.hors_Police = equipageResult._source.equipage_hors_police;
             oequipage.equipements = equipageResult._source.equipage_equipements;
             oequipage.date_creation = equipageResult._source.equipage_date_creation;
-            showNotification("Vous rejoignez un équipage. Géolocalisation désactivée", "equipageInfo");
+            showNotification("Vous rejoignez un équipage", "equipageInfo");
             console.log("Chef de bord non coche -> je rejoins l'equipage "+oequipage.id+" , geoloc desactivee");
             document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
