@@ -5,6 +5,10 @@
   const INDICATIF_RADIO = "INDICATIF_RADIO";
   const EQUIPAGE_ES_ID = "EQUIPAGE_ES_ID";
   const EQUIPAGE_DATE = "EQUIPAGE_DATE";
+  const CHEF_DE_BORD = "CHEF_DE_BORD";
+  const COMPOSITION = "COMPOSITION";
+  const FEMME = "FEMME";
+  const HORS_POLICE = "HORS_POLICE"
 
   window.addEventListener("load", function() {
 
@@ -56,12 +60,14 @@
     }
     // Recuperation des champs de saisie TERMINEE <----
 
+    // Bouton de mise a jour de l'equipage
     var validerModifsBtn = document.getElementById("validerModifsBtn");
     validerModifsBtn.addEventListener('click', function() {
       refreshEquipage(equipageForm);
       showNotification("Mise a jour de votre équipage", "equipageSuccess");
     });
 
+    // Controle de la saisie de l'indicatif radio
     var indicatifRadioInput = document.getElementById('indicatifRadioInput');
     indicatifRadioInput.addEventListener('keyup', function(event) {
       var regexp = /[a-zA-Z0-9]/;
@@ -71,8 +77,7 @@
       }
     });
 
-
-    // Orientation de la tablette
+    // Orientation auto de la map avec DeviceOrientationEvent
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', deviceOrientationHandler, false);
       showNotification("DeviceOrientation available", "idInfo")
@@ -408,6 +413,7 @@
     }
   }
 
+  // Permet de mettre a jour dynamiquement un equipage
   function refreshEquipage(form) {
     oequipage.composition = form.compositionEquipage.value;
     oequipage.femme = form.presenceFemme.checked;
@@ -428,6 +434,8 @@
     oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
+
+  // Permet de creer un equipage avec une date_creation egale a Date.now()
   function createEquipage(form, indicatif, _id) {
     // Remplissage de l'objet Equipage
     if (_id != undefined) {
@@ -454,6 +462,7 @@
     oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
+  // Permet de desactiver le bouton de lancement
   function disableGoButton() {
     $('#goButton').attr('disabled', 'disabled');
     $('#goButton').addClass('disabled');
@@ -461,7 +470,7 @@
     $('#goButton').addClass('btn-danger');
   }
 
-  // Saisie de l'identifiant Radio
+  // Saisie de l'identifiant Radio + lancement de du service de geolocalisation
   function login() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
@@ -476,9 +485,10 @@
       ouser.clean();
       ouser.id = idRadio;
       ouser.type = _type;
+
       // Traitement si la case chef de bord est coche
       if (equipageForm.chefDeBord.checked) {
-        // Chercher si un equipage avec le meme indicatif existe et verifier sa date de creation
+        // Recherche de l'existance d'un equipage avec le meme indicatif radio
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
         var onSuccess = function(response, error) {
@@ -531,7 +541,7 @@
           if (error != undefined) {
             console.error(error);
           } else if (response.hits.total == 0) {
-            // Equipage non present dans ES, lancement geoloc
+            // Equipage non present dans ES, lancement geoloc comme dans la version 1.0
             console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
             disableGoButton();
             startUserMode();
@@ -555,41 +565,13 @@
     }
   }
 
-
-  const CHEF_DE_BORD = "CHEF_DE_BORD";
-  const COMPOSITION = "COMPOSITION";
-  const FEMME = "FEMME";
-  const HORS_POLICE = "HORS_POLICE"
-
-  // Permet de memoriser les saisies
+  // Permet de memoriser les saisies dans le localStorage a chaque click du bouton 'GO'
   function memoriserSaisies() {
-
-    if (localStorage.getItem(INDICATIF_RADIO) != null) {
-      localStorage.removeItem(INDICATIF_RADIO);
-    }
     localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
-
-    var equipementForm = document.getElementById('equipageForm');
-
-    if (localStorage.getItem(CHEF_DE_BORD) != null) {
-      localStorage.removeItem(CHEF_DE_BORD)
-    }
-    localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
-
-    if (localStorage.getItem(COMPOSITION) != null) {
-      localStorage.removeItem(COMPOSITION)
-    }
-    localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
-
-    if (localStorage.getItem(FEMME) != null) {
-      localStorage.removeItem(FEMME)
-    }
-    localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
-
-    if (localStorage.getItem(HORS_POLICE) != null) {
-      localStorage.removeItem(HORS_POLICE)
-    }
-    localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
+    localStorage.setItem(CHEF_DE_BORD, equipageForm.chefDeBord.checked);
+    localStorage.setItem(COMPOSITION, equipageForm.compositionEquipage.value);
+    localStorage.setItem(FEMME, equipageForm.presenceFemme.checked);
+    localStorage.setItem(HORS_POLICE, equipageForm.presenceHorsPolice.checked);
   }
 
   // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
@@ -607,9 +589,6 @@
       isMenuVisible = true;
     }
   }
-
-
-
 
   // Utilise proj4js pour la conversion de la lat, lng vers la projection de lambert93
   // Sauvegarde de la dernière position dans sessionStorage
@@ -654,7 +633,6 @@
       $('#'+name)[0].hidden = true;
     }
   }
-
 
   function degreeToRad(angle) {
     return Math.PI * angle / 180;
