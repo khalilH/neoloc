@@ -7,152 +7,29 @@
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
 </head>
 <body>
-  <div id='response' style='color:green;'>
+  robotoz
+  <input id="saisie" type="text" name="indicatif">
+  <div id='error' style='color:red;'>
 
   </div>
-  <div id='error' style='color:red;'>
+  <div id='response' style='color:green;'>
 
   </div>
 
   <script type="text/javascript">
-  const INDEX = 'neo';
-  const TYPE = 'tests'
-  const _ID = 'neo_id';
-  const _X = 'neo_x';
-  const _Y = 'neo_y';
-  const _ACCURACY = 'neo_accur';
-  const _TIMESTAMP = 'neo_timestamp'
+    var input = document.getElementById('saisie');
 
-  var client = new $.es.Client({
-    hosts: 'http://plf.poc.plf-sso.ppol.minint.fr/es',
-    // apiVersion: '2.4'
-  });
+    var lastLength = input.value.length;
 
-  var _id;
 
-  function createDocument(id, x, y, accuracy, timestamp) {
-    var doc = {};
-    doc[_ID] = id;
-    doc[_X] = x;
-    doc[_Y] = y;
-    doc[_ACCURACY] = accuracy;
-    doc[_TIMESTAMP] = timestamp;
-    return doc;
-  }
-
-  function create(id, x, y, accuracy, timestamp) {
-
-    var doc = createDocument(id, x, y, accuracy, timestamp);
-
-    client.index({
-      index: INDEX,
-      type: TYPE,
-      body: doc
-    }, function (error, response) {
-      if (error != undefined) {
-        document.getElementById('error').innerHTML += JSON.stringify(error)+'<br>';
-        console.error(error);
-      } else {
-        console.log(response);
-        document.getElementById('response').innerHTML += response._id+' created<br>';
-        _id = response._id;
+    input.addEventListener('keyup', function(event) {
+      var regexp = /[a-zA-Z0-9]/;
+      if(!regexp.test(event.key)) {
+        var length = input.value.length;
+          input.value = input.value.slice(0, length-1);
       }
-    });
-  }
+    })
 
-  function update(id, x, y, accuracy, timestamp){
-    if (_id != undefined) {
-      var doc = createDocument(id, x, y, accuracy, timestamp);
-
-      client.index({
-        index: INDEX,
-        type: TYPE,
-        id: _id,
-        body: doc
-      }, function (error, response) {
-        if (error != undefined) {
-          document.getElementById('error').innerHTML += JSON.stringify(error)+'<br>';
-          console.error(error);
-        } else {
-          console.log(response);
-          document.getElementById('response').innerHTML += response._id+' updated<br>';
-        }
-      });
-    } else {
-      document.getElementById('error').innerHTML += 'Create document first<br>'
-    }
-  }
-
-  // POUR LES QUERY FAIRE ATTENTION AU PARAMETRE SIZE
-
-  function getMine(id) {
-    client.search({
-      index: INDEX,
-      type: TYPE,
-      body: {
-        query : { match : {"neo_id" : id }}
-      }
-    }, function(error, response) {
-      if (error != undefined) {
-        console.error(error);
-      } else if (response.hits.total == 0) {
-        console.log(id+' non present dans la base');
-      } else {
-        console.log(response.hits.hits[0]);
-      }
-    });
-  }
-
-  function get(xmin, ymin, xmax, ymax) {
-    client.search({
-      index: INDEX,
-      body: {
-        "query" : {
-          "bool" : {
-            "must" : [
-              {"range" : {"neo_x": { "gte" : xmin, "lte" : xmax } }},
-              {"range" : {"neo_y": { "gte" : ymin, "lte" : ymax } }}
-            ]
-          }
-        }
-      },
-      timeout: '5s'
-    }, function(error, response) {
-      if (error != undefined) {
-        console.error(error);
-      } else {
-        console.log(response.hits.hits);
-        // do something with results
-      }
-    });
-  }
-
-  function getAll() {
-    client.search({
-      index: INDEX,
-      body: {
-        query : {"match_all": {}}
-      },
-      timeout: '5s'
-    }, function(error, response) {
-      if (error != undefined) {
-        console.error(error);
-      } else {
-        console.log(response.hits.hits);
-        // do something with results
-      }
-    });
-  }
-
-  function _create() {
-    create('test', 2.36, 48.86, 17, Date.now());
-  }
-
-  function _update() {
-    update('test', 2.50, 49.0, 5, Date.now());
-  }
-
-  get(652688, 6860095, 653796, 6860473);
   </script>
 </body>
 </html>

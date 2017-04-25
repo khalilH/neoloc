@@ -53,6 +53,16 @@ html, body {
   left: 3em;
 }
 
+#autoCenterDiv {
+  display: none;
+}
+
+.autoCenter {
+  width: auto;
+  top: 7px;
+  left: 5.5em;
+}
+
 input, textarea {
   margin-bottom: 5px;
 }
@@ -188,14 +198,23 @@ input, textarea {
     }
   }
 
-
   .toggle {
     width: auto;
     top: 7px;
     left: 5.5em;
   }
+
+  .autoCenter {
+    width: auto;
+    top: 7px;
+    left: 8em;
+  }
 }
 
 #myForm {
   text-align: center;
+}
+
+.attribution_perso{
+	font-size: 1rem !important;
 }

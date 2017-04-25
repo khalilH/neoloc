@@ -8,22 +8,21 @@
   <link rel="stylesheet" href="geoloc_neo.css">
   <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
 
-  <script src="config_dev.js"></script>
+  <script src="config.js"></script>
   <script src="js/class/ESManager.js"></script>
   <script src="js/class/Map.js"></script>
   <script src="js/class/FeatureManager.js"></script>
+  <script src="js/class/EquipageManager.js"></script>
+  <script src="js/class/Equipage.js"></script>
   <script src="js/class/User.js"></script>
   <script src="js/script/functions.js"></script>
   <script src="js/script/decoration.js"></script>
-          
+
   <script src="openlayers/ol.js"></script>
   <script src="proj4js/dist/proj4-src.js"></script>
   <script src="jquery-3.1.1.min.js"></script>
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
-  <script src="moment.min.js"></script>
-  <script src="datepicker/bootstrap-datetimepicker.min.js"></script>
-  <script src="datepicker/fr.js"></script>
 </head>
 <body>
 
@@ -33,31 +32,22 @@
         <ul class="nav nav-menubar">
 
           <!-- Formulaire d'identification -->
-          <li onclick="toggle('idDiv')"><a href="#">Identifiant Radio</a></li>
+          <li onclick="toggle('idDiv')"><a href="#">Indicatif Radio</a></li>
           <div id="idDiv" >
             <form id="myForm" onsubmit="return false;">
               <div class="row">
-                <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+                <div class="form-group col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
                   <div id="idInputDiv" class="input-group">
-                    <input type="text" class="form-control" name="idRadio" placeholder="Id radio">
+                    <input id="indicatifRadioInput" type="text" class="form-control" name="idRadio" placeholder="Indicatif radio">
                     <span class="input-group-btn">
                       <button id="goButton" class="btn btn-info active" type="button" onclick="login()">Go</button>
                     </span>
                   </div>
                   <span id="idError" class="label label-danger" style="display:none;"></span>
+                  <span id="idInfo" class="label label-info" style="display:none;"></span>
                 </div>
               </div>
               <div class="row">
-                <div class='col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1'>
-                  <div class="form-group">
-                    <div class='input-group date' id='datetimepicker1'>
-                      <input id="finVacation" type='text' placeholder="Date/Heure fin de vacation" class="form-control"/>
-                      <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
                 <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
                   <label class="radio-inline">
                     <input type="radio" name="type" value="bicycle" checked>
@@ -81,6 +71,7 @@
           </div>
 
           <!-- Creer un evenement -->
+          <!--
           <li onclick="toggle('evenementDiv')"><a href="#">Créer un évènement</a></li>
           <div id="evenementDiv" class="row">
             <form id="evenementForm">
@@ -100,30 +91,129 @@
               </div>
             </form>
           </div>
+		   -->
+
+       <li onclick="toggle('equipageDiv')"><a href="#">Équipage</a></li>
+       <div id="equipageDiv">
+         <div class="row">
+           <form id="equipageForm" onsubmit="return false;">
+             <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+               <span id="equipageError" class="label label-danger" style="display:none;">erreur</span>
+               <span id="equipageInfo" class="label label-info" style="display:none;"></span>
+               <span id="equipageSuccess" class="label label-success" style="display:none;"></span>
+               <div class="form-group col-xs-offset-3 col-sm-offset-3">
+                 <label class="radio-inline">
+                   <input type="checkbox" name="chefDeBord">
+                   Chef de bord
+                 </label>
+               </div>
+               <label class="">Composition</label>
+               <div class="row">
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+1">
+                     0+1
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+2">
+                     0+2
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+3">
+                     0+3
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="0+4">
+                     0+4
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+1">
+                     1+1
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+2">
+                     1+2
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+3">
+                     1+3
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-3 col-sm-3">
+                   <label class="radio-inline">
+                     <input type="radio" name="compositionEquipage" value="1+4">
+                     1+4
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="presenceFemme">
+                     Femme
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="presenceHorsPolice">
+                     Hors police
+                   </label>
+                 </div>
+               </div>
+               <label class="">Equipements disponibles</label>
+               <div class="row">
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="equipementAssaut" value="assaut">
+                     Equipement d'assaut
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="grenades" value="grenades">
+                     Grenades à main
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="taser" value="taser">
+                     TASER
+                   </label>
+                 </div>
+                 <div class="form-group col-xs-6 col-sm-6">
+                   <label class="radio-inline">
+                     <input type="checkbox" name="lbd" value="lbd">
+                     LBD
+                   </label>
+                 </div>
+               </div>
+               <div class="row">
+                 <div class="col-xs-6 col-xs-offset-3 col-sm-6 col-sm-offset-3">
+                   <button id="validerModifsBtn" class="btn btn-info" type="button" name="button" style="display:none">Valider modifs</button>
+                 </div>
+               </div>
+             </div>
+           </form>
+         </div>
+       </div>
 
           <!-- Exemple de sous-menu  -->
-          <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
+          <!-- <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
           <div class="row">
-            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-          </div>
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem</p>
+          </div> -->
 
-          <li><a href="#">Analytics</a></li>
 
-          <li><a href="#">Export</a></li>
-
-          <li><a href="#">Analytics</a></li>
-
-          <!-- Exemple de sous-menu -->
-          <li onclick="toggle('loremDiv2')" ><a href="#">Lorem</a></li>
-          <div class="row">
-            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv2">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-          </div>
-
-          <li><a href="#">Reports</a></li>
-
-          <li><a href="#">Analytics</a></li>
-
-          <li><a href="#">Export</a></li>
         </ul>
 
       </div>
@@ -137,12 +227,12 @@
 
   <div id="error" class="popup" style="display:none"></div>
   <div id="notification" class="popup" style="display:none"></div>
-  
+
 
 
 
 <script src="js/script/initNeoloc.js"></script>
-  
+
 
 </body>
 </html>

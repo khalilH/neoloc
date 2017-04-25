@@ -9,10 +9,10 @@ var ESManager = function (host)
  * cherche les elements et execute le callback
  */
 ESManager.prototype.searchExec = function (searchParams, onSuccess, onError)
-{	
+{
 
 	      this.client.search(searchParams, function(error, response) {
-	        if (error != undefined) {	        	
+	        if (error != undefined) {
 	          console.error(error);
 	          if (error.status == 408) {
 	            showError("Perte de connexion");
@@ -22,14 +22,14 @@ ESManager.prototype.searchExec = function (searchParams, onSuccess, onError)
 	          onSuccess(response, error);
 	        }
 	      });
-	
+
 };
 
 ESManager.prototype.indexExec = function (indexParams, onSuccess, onError)
-{	
+{
 
 	      this.client.index(indexParams, function(error, response) {
-	        if (error != undefined) {	        	
+	        if (error != undefined) {
 	          console.error(error);
 	          if (error.status == 408) {
 	            showError("Perte de connexion");
@@ -38,5 +38,5 @@ ESManager.prototype.indexExec = function (indexParams, onSuccess, onError)
 	        } else {
 	          onSuccess(response, error);
 	        }
-	      });	      	
+	      });
 };
