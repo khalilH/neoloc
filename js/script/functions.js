@@ -64,7 +64,6 @@
     var validerModifsBtn = document.getElementById("validerModifsBtn");
     validerModifsBtn.addEventListener('click', function() {
       refreshEquipage(equipageForm);
-      showNotification("Mise a jour de votre équipage", "equipageSuccess");
     });
 
     // Controle de la saisie de l'indicatif radio
@@ -415,23 +414,28 @@
 
   // Permet de mettre a jour dynamiquement un equipage
   function refreshEquipage(form) {
-    oequipage.composition = form.compositionEquipage.value;
-    oequipage.femme = form.presenceFemme.checked;
-    oequipage.hors_police = form.presenceHorsPolice.checked;
-    oequipage.equipements = [];
-    if (form.equipementAssaut.checked) {
+    if (form.chefDeBord.checked) {
+      oequipage.composition = form.compositionEquipage.value;
+      oequipage.femme = form.presenceFemme.checked;
+      oequipage.hors_police = form.presenceHorsPolice.checked;
+      oequipage.equipements = [];
+      if (form.equipementAssaut.checked) {
         oequipage.equipements.push(form.equipementAssaut.value);
-    }
-    if (form.grenades.checked) {
+      }
+      if (form.grenades.checked) {
         oequipage.equipements.push(form.grenades.value);
-    }
-    if (form.taser.checked) {
+      }
+      if (form.taser.checked) {
         oequipage.equipements.push(form.taser.value);
-    }
-    if (form.lbd.checked) {
+      }
+      if (form.lbd.checked) {
         oequipage.equipements.push(form.lbd.value);
+      }
+      showNotification("Mise a jour de votre équipage", "equipageSuccess");
+      oequipageManager.save(NEOCONFIG.es.index, oequipage);
+    } else {
+      showNotification("Vous n'etes pas chef de bord", "equipageError");
     }
-    oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
 
@@ -496,45 +500,35 @@
             console.error(error);
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, creation possible
-              console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
-              createEquipage(equipageForm, idRadio);
-              document.getElementById("validerModifsBtn").style.display = 'inline';
-              equipageForm.chefDeBord.disabled = true;
-              disableGoButton();
-              startUserMode();
-            } else {
-              var equipageResult = response.hits.hits[0];
-              var timestamp = equipageResult._source.equipage_date_creation;
-              var _id = equipageResult._id;
-              if (Date.now() - timestamp < 6 * HOUR_IN_MILLIS) {
-                var local_id = localStorage.getItem(EQUIPAGE_ES_ID);
-                var local_date = localStorage.getItem(EQUIPAGE_DATE);
-                if (local_id == _id && local_date == timestamp) {
-                  // L'equipage est recent mais je suis celui qui l'a cree donc je pourrai le modifier
-                  document.getElementById("validerModifsBtn").style.display = 'inline';
-                  equipageForm.chefDeBord.disabled = true;
-                  showNotification("Mise a jour possible de l'equipage", "equipageInfo");
-                  disableGoButton();
-                  startUserMode();
-                } else {
-                  // L'equipage est recent, mise a jour non possible, pas de geoloc
-                  showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
-                }
+            console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
+            createEquipage(equipageForm, idRadio);
+            document.getElementById("validerModifsBtn").style.display = 'inline';
+            disableGoButton();
+            startUserMode();
+          } else {
+            var equipageResult = response.hits.hits[0];
+            oequipage.ESid = equipageResult._id;
+            oequipage.id = equipageResult._source.equipage_id;
+            oequipage.composition = equipageResult._source.equipage_composition;
+            oequipage.femme = equipageResult._source.equipage_femme;
+            oequipage.hors_Police = equipageResult._source.equipage_hors_police;
+            oequipage.equipements = equipageResult._source.equipage_equipements;
+            oequipage.date_creation = equipageResult._source.equipage_date_creation;
+            if (Date.now() - oequipage.date_creation < 6 * HOUR_IN_MILLIS) {
+              showNotification("Mise a jour possible de l'equipage", "equipageInfo");
             } else {
               console.log("Creation d'equipage possible")
-              createEquipage(equipageForm, idRadio, ESid);
-              document.getElementById("validerModifsBtn").style.display = 'inline';
-              equipageForm.chefDeBord.disabled = true;
-              disableGoButton();
-              startUserMode();
+              createEquipage(equipageForm, idRadio, oequipage.ESid); // mise a jour date de creation
             }
+            document.getElementById("validerModifsBtn").style.display = 'inline';
+            disableGoButton();
+            startUserMode();
           }
         }
 
         oes.searchExec(searchParams, onSuccess, null);
 
       } else {
-        equipageForm.chefDeBord.disabled = true;
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
         var onSuccess = function(response, error) {
@@ -547,11 +541,18 @@
             startUserMode();
           } else {
             var equipageResult = response.hits.hits[0];
-            var timestamp = equipageResult._source.equipage_date_creation;
-            var indicatif = equipageResult._source.equipage_id;
+            oequipage.ESid = equipageResult._id;
+            oequipage.id = equipageResult._source.equipage_id;
+            oequipage.composition = equipageResult._source.equipage_composition;
+            oequipage.femme = equipageResult._source.equipage_femme;
+            oequipage.hors_Police = equipageResult._source.equipage_hors_police;
+            oequipage.equipements = equipageResult._source.equipage_equipements;
+            oequipage.date_creation = equipageResult._source.equipage_date_creation;
             showNotification("Vous rejoignez un équipage. Géolocalisation désactivée", "equipageInfo");
-            console.log("Chef de bord non coche -> je rejoins l'equipage "+indicatif+" , geoloc desactivee");
+            console.log("Chef de bord non coche -> je rejoins l'equipage "+oequipage.id+" , geoloc desactivee");
+            document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
+            startUserMode();
           }
         }
 
