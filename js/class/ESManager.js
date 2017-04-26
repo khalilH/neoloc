@@ -40,3 +40,20 @@ ESManager.prototype.indexExec = function (indexParams, onSuccess, onError)
 	        }
 	      });
 };
+
+ESManager.prototype.getExec = function (getParams, onSuccess, onError)
+{
+	this.client.get(getParams, function(error, response) {
+		if (error != undefined) {
+			console.error(error);
+			if (error.status == 408) {
+				showError("Perte de connexion");
+				return false;
+			} else {
+				showError(JSON.stringify(error));
+			}
+		} else {
+			onSuccess(response, error)
+		}
+	});
+}

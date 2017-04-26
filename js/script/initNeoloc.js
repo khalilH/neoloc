@@ -9,6 +9,8 @@
 
   const EARTH_RADIUS = 6371.01;
 
+  const ES_ID = 'ES_ID';
+
   const _E7 = Math.pow(10, 7);
   const RESOLUTIONS = [
     1322.9193125052918,

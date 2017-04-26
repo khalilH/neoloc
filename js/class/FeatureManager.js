@@ -46,9 +46,10 @@ FeatureManager.prototype.getFeatureParams = function (index, type, id){
 	return {
         index: index,
         type: type,
-        body: {
-          query : { match : {"neo_id" : id }}
-        }
+				id: id
+        // body: {
+        //   query : { match : {"neo_id" : id }}
+        // }
       };
 
 };
@@ -123,12 +124,17 @@ FeatureManager.prototype.add = function (index, type, user){
 	var params = this.getAddFeatureParams(index, type, doc);
 
 	var onSuccess = function(response, error){
-		console.log("ajout ok");
-        console.log(response);
-        user.ESid = response._id;
-        if (!allowXHR) {
-          allowXHR = true;
-        }
+		if (error != undefined) {
+			console.error(error);
+		} else {
+			console.log("ajout ok");
+			console.log(response);
+			localStorage.setItem(ES_ID, response._id);
+			user.ESid = response._id;
+			if (!allowXHR) {
+				allowXHR = true;
+			}
+		}
 	};
 
 	this.es.indexExec(params, onSuccess, null);

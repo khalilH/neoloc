@@ -268,78 +268,89 @@
   }
 
 
+  function addMapEvents() {
+    // Gestion du click simple sur la carte pour l'initialisation manuelle
+    // de sa position en attente du fix GPS
+    var mapDiv = document.getElementById('map');
+    var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+
+    mapDiv.addEventListener('mousedown', function(event) {
+      console.log(event);
+      mousedown_x = event.layerX;
+      mousedown_y = event.layerY;
+    });
+
+    mapDiv.addEventListener('mouseup', function(event) {
+      mouseup_x = event.layerX;
+      mouseup_y = event.layerY;
+
+      if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
+        if(!isGPSReady) {
+          var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
+          ouser.x = coordinates[0];
+          ouser.y = coordinates[1];
+          ouser.accuracy = 5;
+          ouser.heading = 0;
+          ouser.speed = 0;
+          console.log(ouser.getPoint());
+          refreshId();
+          ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
+          if (ouser.ESid != null) {
+            lastDateUpdate = Date.now();
+          }
+          omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+          omap.centerMap(ouser.getPoint());
+          sessionStorage.lastPosition = JSON.stringify(coordinates);
+        }
+      }
+    });
+  }
+
   /**
    * Lancement de l'application en mode user
    */
   function startUserMode() {
     if (navigator.geolocation) {
       openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
-      var point;
 
-      //recuperer le filtre de recherche
-      var searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser.id);
-      /**
-       * onsuccess
-       * initialiser l'utilisateur et ses interactions avec la carte
-       */
-      var onSuccess = function(response, error){
+      //Recuperer _id de mon document de type neo
+      var _id = localStorage.getItem(ES_ID);
+      if (_id != null) {
+        // J'ai peut etre un document qui existe ES
+        console.log("J'ai peut etre un document qui existe ES");
+        var getParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, _id);
+
+        var onSuccess = function (response, error) {
           if (error != undefined) {
-              console.error(error);
-            } else if (response.hits.total == 0) {
-              console.log(ouser.id+' non present dans la base');
-            } else {
-              var feature = response.hits.hits[0];
-              ouser.ESid = feature._id;
-              //console.log(ouser.ESid);
-              ouser.x = feature._source.neo_x;
-              ouser.y = feature._source.neo_y;
-              ouser.type = feature._source.neo_type;
-              refreshInputRadio(ouser.type);
-              sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
-              omap.centerMapWithZoom(ouser.getPoint());
-            }
+            console.error(error);
+            localStorage.removeItem(ES_ID);
+          } else if (!response.found) {
+            console.log("le document "+_id+" n'existe pas");
+            localStorage.removeItem(ES_ID);
+          } else {
+            console.log("Le document "+_id+" existe");
+            console.log(response);
+            ouser.ESid = response._id;
+            ouser.x = response._source.neo_x;
+            ouser.y = response._source.neo_y;
+            ouser.type = response._source.neo_type;
+            ouser.accuracy = response._source.neo_accur;
+            refreshInputRadio(ouser.type);
+            sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
+            omap.centerMapWithZoom(ouser.getPoint());
+          }
+          addMapEvents();
+          omap.initLocation();
+        }
 
-            // Gestion du click simple sur la carte pour l'initialisation manuelle
-            // de sa position en attente du fix GPS
-            var mapDiv = document.getElementById('map');
-            var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
-
-            mapDiv.addEventListener('mousedown', function(event) {
-              console.log(event);
-              mousedown_x = event.layerX;
-              mousedown_y = event.layerY;
-            });
-
-            mapDiv.addEventListener('mouseup', function(event) {
-              mouseup_x = event.layerX;
-              mouseup_y = event.layerY;
-
-              if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
-                if(!isGPSReady) {
-                  var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
-                  ouser.x = coordinates[0];
-                  ouser.y = coordinates[1];
-                  ouser.accuracy = 5;
-                  ouser.heading = 0;
-                  ouser.speed = 0;
-                  console.log(ouser.getPoint());
-                  refreshId();
-                  ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
-                  if (ouser.ESid != null) {
-                	  lastDateUpdate = Date.now();
-                  }
-                  omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
-                  omap.centerMap(ouser.getPoint());
-                  sessionStorage.lastPosition = JSON.stringify(coordinates);
-                }
-              }
-            });
-            omap.initLocation();
-      };//fin onSuccess
-
-  	  //checher/executer
-	  oes.searchExec(searchParams, onSuccess, null);
-    }else{
+        oes.getExec(getParams, onSuccess, null);
+      } else {
+        // Je n'ai pas de document qui existe dans ES
+        console.log("Je n'ai pas de document qui existe dans ES");
+        addMapEvents();
+        omap.initLocation();
+      }
+    } else{
       showError("Géolocalisation non supportée");
     }
   }
@@ -372,7 +383,7 @@
   	  //checher/executer
 	  oes.searchExec(searchParams, onSuccess, null);
 
-    }else{
+    } else {
     	  console.log('TOO SOON - getFeaturesInMapExtent');
     }
   }
@@ -386,8 +397,11 @@
     form.idRadio.value = idRadio;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouserSeek.id = idRadio;
-      ouserSeek.type = _type;
+      // ouserSeek.id = idRadio;
+      // ouserSeek.type = _type;
+      ouser.id = idRadio;
+      ouser.type = _type;
+
     }
   }
 

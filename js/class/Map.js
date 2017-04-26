@@ -36,7 +36,7 @@ Map.prototype.refreshPositions = function (hits){
 		      var timestamp = feature._source.neo_timestamp;
 		      var delta = Date.now() - timestamp;
 		      //si delai de 6 heures, on ignore le point
-		      if (delta > 60*6 * MINUTE_IN_MILLIS) {
+		      if (delta > 6 * 60 * MINUTE_IN_MILLIS) {
 		        continue;
 		      }
 		      //si la précision est superieure à 24
@@ -56,7 +56,7 @@ Map.prototype.updateLocalFeatureGeometry = function(x, y) {
   var features = vectorSource.getFeatures();
   var length = features.length;
   for (var i = 0; i < length; i++) {
-    if (features[i].get('neo_id') == ouser.id) {
+    if (features[i].get('doc_id') == ouser.ESid) {
       refreshId();
       features[i].setGeometry(new ol.geom.Point([x, y]));
       features[i].set('type', ouser.type);
@@ -68,6 +68,7 @@ Map.prototype.updateLocalFeatureGeometry = function(x, y) {
   var feat = new ol.Feature({geometry: point});
   feat.set('color', 'red');
   feat.set('neo_id', ouser.id);
+	feat.set('doc_id', ouser.ESid);
   feat.set('type', ouser.type);
   feat.setStyle(markerStyle);
   vectorSource.addFeature(feat);
@@ -82,13 +83,14 @@ Map.prototype.updateLocalFeatureGeometry = function(x, y) {
  * @param delta  //temps depuis la derniere mise a jour de la feature
  */
 Map.prototype.addMarker = function(feature, delta) {
-  var neo_id = feature._source.neo_id;
+	var doc_id = feature._id;
+	var neo_id = feature._source.neo_id;
   var x = feature._source.neo_x;
   var y = feature._source.neo_y;
   var neo_type = feature._source.neo_type;
   var point = new ol.geom.Point([x, y]);
   var feat = new ol.Feature({geometry: point});
-  if (neo_id == ouserSeek.id) {
+  if (doc_id == ouser.ESid) {
     feat.set('color', 'red');
   } else {
     if (delta > 5 * MINUTE_IN_MILLIS) {
@@ -99,6 +101,7 @@ Map.prototype.addMarker = function(feature, delta) {
   }
   feat.set('neo_id', neo_id);
   feat.set('type', neo_type);
+	feat.set('doc_id', doc_id);
   feat.setStyle(markerStyle);
   vectorSource.addFeature(feat);
 };
@@ -111,13 +114,14 @@ Map.prototype.addMarker = function(feature, delta) {
  * @param delta  //temps depuis la derniere mise a jour de la feature
  */
 Map.prototype.addCircle = function(feature, delta) {
+	var doc_id = feature._id;
   var neo_id = feature._source.neo_id;
   var radius = feature._source.neo_accur;
   var x = feature._source.neo_x;
   var y = feature._source.neo_y;
   var circle = new ol.geom.Circle([x, y], radius);
   var feat = new ol.Feature({geometry: circle});
-  if (neo_id == ouser.id) {
+  if (doc_id == ouser.ESid) {
     feat.set('color', 'red');
   } else {
     if (delta > 5 * MINUTE_IN_MILLIS) {
@@ -126,6 +130,7 @@ Map.prototype.addCircle = function(feature, delta) {
       feat.set('color', 'green');
     }
   }
+	feat.set('doc_id', doc_id);
   feat.setStyle(circleStyle);
   vectorSource.addFeature(feat);
 };
