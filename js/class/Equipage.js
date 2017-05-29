@@ -9,6 +9,7 @@ var Equipage = function()
   this.date_creation = null;
   this.x = null;
   this.y = null;
+  this.type = null;
   this.timestamp = null;
 };
 
@@ -22,6 +23,7 @@ Equipage.prototype.clean = function() {
     this.date_creation = null;
     this.x = null;
     this.y = null;
+    this.type = null;
     this.timestamp = null;
 };
 

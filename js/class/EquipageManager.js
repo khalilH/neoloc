@@ -11,6 +11,7 @@ var EquipageManager = function (es)
   this._EQUIPAGE_DATE_CREATION = "equipage_date_creation";
   this._EQUIPAGE_X = "equipage_x";
   this._EQUIPAGE_Y = "equipage_y";
+  this._EQUIPAGE_TYPE = "equipage_type";
   this._EQUIPAGE_TIMESTAMP = "equipage_timestamp";
 
 };
@@ -47,6 +48,7 @@ EquipageManager.prototype.saveAsChefDeBord = function (index, equipage, user) {
   if (updateEquipageLocation && equipage.ESid != undefined) {
     equipage.x = user.x;
     equipage.y = user.y;
+    equipage.type = form.type.value;
     equipage.timestamp = Date.now();
     this.save(NEOCONFIG.es.index, equipage);
   }
@@ -61,7 +63,7 @@ EquipageManager.prototype.save = function (index, equipage) {
 }
 
 EquipageManager.prototype.create = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.timestamp);
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.type, equipage.timestamp);
 
   var params = this.getCreateEquipageParams(index, doc);
 
@@ -77,7 +79,7 @@ EquipageManager.prototype.create = function (index, equipage) {
 }
 
 EquipageManager.prototype.update = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.timestamp);
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.type, equipage.timestamp);
 
   var params = this.getUpdateEquipageParams(index, equipage.ESid, doc);
 
@@ -93,7 +95,7 @@ EquipageManager.prototype.update = function (index, equipage) {
 };
 
 // atention a la caleur de date_creation
-EquipageManager.prototype.createDocument = function (id, composition, ads, femme, hors_police, equipements, date_creation, x, y, timestamp) {
+EquipageManager.prototype.createDocument = function (id, composition, ads, femme, hors_police, equipements, date_creation, x, y, type, timestamp) {
   var doc = {};
   doc[this._EQUIPAGE_ID] = id;
   doc[this._EQUIPAGE_COMPOSITION] = composition;
@@ -104,6 +106,7 @@ EquipageManager.prototype.createDocument = function (id, composition, ads, femme
   doc[this._EQUIPAGE_DATE_CREATION] = date_creation;
   doc[this._EQUIPAGE_X] = x;
   doc[this._EQUIPAGE_Y] = y;
+  doc[this._EQUIPAGE_TYPE] = type;
   doc[this._EQUIPAGE_TIMESTAMP] = timestamp;
   return doc;
 };

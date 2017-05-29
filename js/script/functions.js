@@ -416,6 +416,9 @@
       case "policeman":
       form.type[3].checked = true;
       break;
+      case "fourgon":
+      form.type[4].checked = true;
+      break;
       default:
       console.error("je ne dois pas passer ici "+neo_type);
     }
