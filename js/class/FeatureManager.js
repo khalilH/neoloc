@@ -84,9 +84,6 @@ FeatureManager.prototype.getAddFeatureParams = function (index, type, doc){
 };
 
 
-
-
-
 FeatureManager.prototype.save = function (index, type, user){
 
     if (user.ESid == null) {
@@ -94,7 +91,7 @@ FeatureManager.prototype.save = function (index, type, user){
     } else {
   	  this.update(index, type, user);
     }
-    //console.log(user);
+		oequipageManager.saveAsChefDeBord(NEOCONFIG.es.index, oequipage, ouser);
 
 };
 

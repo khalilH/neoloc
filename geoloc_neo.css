@@ -47,12 +47,6 @@ html, body {
   padding-left: 20px;
 }
 
-.centerButton {
-  width: auto;
-  top: 7px;
-  left: 3em;
-}
-
 #autoCenterDiv {
   display: none;
 }
@@ -60,7 +54,7 @@ html, body {
 .autoCenter {
   width: auto;
   top: 7px;
-  left: 5.5em;
+  left: 3em;
 }
 
 input, textarea {
@@ -201,13 +195,13 @@ input, textarea {
   .toggle {
     width: auto;
     top: 7px;
-    left: 5.5em;
+    left: 3em;
   }
 
   .autoCenter {
     width: auto;
     top: 7px;
-    left: 8em;
+    left: 5.5em;
   }
 }
 

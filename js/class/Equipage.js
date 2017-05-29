@@ -7,6 +7,9 @@ var Equipage = function()
   this.hors_Police = null;
   this.equipements = [];
   this.date_creation = null;
+  this.x = null;
+  this.y = null;
+  this.timestamp = null;
 };
 
 Equipage.prototype.clean = function() {
@@ -17,6 +20,9 @@ Equipage.prototype.clean = function() {
     this.hors_Police = null;
     this.equipements = [];
     this.date_creation = null;
+    this.x = null;
+    this.y = null;
+    this.timestamp = null;
 };
 
 Equipage.prototype.saveInLocalStorage = function() {

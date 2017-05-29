@@ -2,6 +2,7 @@
   // + Gestion des events (singleclick et moveend)
 
   var tracking = true;
+  var updateEquipageLocation = false;
   const INDICATIF_RADIO = "INDICATIF_RADIO";
   const EQUIPAGE_ES_ID = "EQUIPAGE_ES_ID";
   const EQUIPAGE_DATE = "EQUIPAGE_DATE";
@@ -75,6 +76,11 @@
     // Bouton de mise a jour de l'equipage
     var validerModifsBtn = document.getElementById("validerModifsBtn");
     validerModifsBtn.addEventListener('click', function() {
+      if (equipageForm.chefDeBord.checked) {
+        updateEquipageLocation = true;
+      } else {
+        updateEquipageLocation = false;
+      }
       refreshEquipage(equipageForm);
     });
 
@@ -144,29 +150,7 @@
       ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
     });
 
-    // Ajout des boutons personalises (centerMap + toggleMenu + autoCenter)
-    app.RecenterMap = function(opt_options) {
-      var options = opt_options || {};
-      var button = document.createElement('button');
-      button.innerHTML = '<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>';
-
-      var this_ = this;
-      var handleRecenterMap = function() {
-        omap.recenterMap();
-
-      };
-      button.addEventListener('click', handleRecenterMap, false);
-
-      var element = document.createElement('div');
-      element.className = 'centerButton ol-unselectable ol-control';
-      element.appendChild(button);
-
-      ol.control.Control.call(this, {
-        element: element,
-        target: options.target
-      });
-
-    };
+    // Ajout des boutons personalises (toggleMenu + autoCenter)
 
     app.ToggleMenu = function(opt_options) {
       var options = opt_options || {};
@@ -217,14 +201,12 @@
 
     };
 
-    ol.inherits(app.RecenterMap, ol.control.Control);
     ol.inherits(app.ToggleMenu, ol.control.Control);
     ol.inherits(app.AutoCenter, ol.control.Control);
 
     map = new ol.Map({
       controls: ol.control.defaults({
       }).extend([
-        new app.RecenterMap(),
         new app.ToggleMenu(),
         new app.AutoCenter()
       ]),
@@ -262,7 +244,7 @@
     // Gestion de l'evenement lorsque la vue de la carte change
     map.on('moveend', function(event) {
       if (!allowXHR) {allowXHR = true;}
-      getFeaturesInMapExtent();
+      // getFeaturesInMapExtent();
     });
 
     // Modification pour le tracking automatique en cas de deplacement de la carte
@@ -276,7 +258,7 @@
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
     equipageForm.chefDeBord.removeAttribute('disabled');
-    setInterval(getFeaturesInMapExtent, REFRESH_TIME);
+    // setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
   // Permet d'ajouter les evenement qui permettent d'indiquer manuellement sa position
@@ -349,6 +331,7 @@
             ouser.accuracy = response._source.neo_accur;
             refreshInputRadio(ouser.type);
             sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
+            omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
             omap.centerMapWithZoom(ouser.getPoint());
           }
           addMapEvents();
@@ -442,6 +425,12 @@
   function refreshEquipage(form) {
     if (form.chefDeBord.checked) {
       // oequipage.id = ouser.id;
+      if (oequipage.id == undefined) {
+        oequipage.id = ouser.id;
+      }
+      if (oequipage.date_creation == undefined) {
+        oequipage.date_creation = Date.now();
+      }
       oequipage.composition = form.compositionEquipage.value;
       oequipage.femme = form.presenceFemme.checked;
       oequipage.hors_police = form.presenceHorsPolice.checked;
@@ -461,6 +450,9 @@
       }
       if (form.pm.checked) {
         oequipage.equipements.push(form.pm.value);
+      }
+      if (form.equipementMO.checked) {
+        oequipage.equipements.push(form.equipementMO.value);
       }
       showNotification("Mise a jour de votre équipage", "equipageSuccess");
       oequipageManager.save(NEOCONFIG.es.index, oequipage);
@@ -522,6 +514,8 @@
 
       // Traitement si la case chef de bord est coche
       if (equipageForm.chefDeBord.checked) {
+
+        updateEquipageLocation = true;
         // Recherche de l'existance d'un equipage avec le meme indicatif radio
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
@@ -642,6 +636,8 @@
     ouser.speed = speed;
     refreshId();
     ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
+    omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+    omap.centerMap(ouser.getPoint());
   }
 
 

@@ -53,6 +53,7 @@ Map.prototype.refreshPositions = function (hits){
  * @param y
  */
 Map.prototype.updateLocalFeatureGeometry = function(x, y) {
+
   var features = vectorSource.getFeatures();
   var length = features.length;
   for (var i = 0; i < length; i++) {
@@ -64,6 +65,7 @@ Map.prototype.updateLocalFeatureGeometry = function(x, y) {
       return;
     }
   }
+	vectorSource.clear();
   var point = new ol.geom.Point([x, y]);
   var feat = new ol.Feature({geometry: point});
   feat.set('color', 'red');
