@@ -4,6 +4,7 @@ var EquipageManager = function (es)
   // Attributs Elasticsearch d'un equipage
   this._EQUIPAGE_ID = "equipage_id";
   this._EQUIPAGE_COMPOSITION = "equipage_composition";
+  this._EQUIPAGE_ADS = "equipage_ADS";
   this._EQUIPAGE_FEMME = "equipage_femme";
   this._EQUIPAGE_HORS_POLICE = "equipage_hors_police";
   this._EQUIPAGE_EQUIPEMENTS = "equipage_equipements";
@@ -46,7 +47,7 @@ EquipageManager.prototype.save = function (index, equipage) {
 }
 
 EquipageManager.prototype.create = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
 
   var params = this.getCreateEquipageParams(index, doc);
 
@@ -62,7 +63,7 @@ EquipageManager.prototype.create = function (index, equipage) {
 }
 
 EquipageManager.prototype.update = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation);
 
   var params = this.getUpdateEquipageParams(index, equipage.ESid, doc);
 
@@ -78,10 +79,11 @@ EquipageManager.prototype.update = function (index, equipage) {
 };
 
 // atention a la caleur de date_creation
-EquipageManager.prototype.createDocument = function (id, composition, femme, hors_police, equipements, date_creation) {
+EquipageManager.prototype.createDocument = function (id, composition, ads, femme, hors_police, equipements, date_creation) {
   var doc = {};
   doc[this._EQUIPAGE_ID] = id;
   doc[this._EQUIPAGE_COMPOSITION] = composition;
+  doc[this._EQUIPAGE_ADS] = ads;
   doc[this._EQUIPAGE_FEMME] = femme;
   doc[this._EQUIPAGE_HORS_POLICE] = hors_police;
   doc[this._EQUIPAGE_EQUIPEMENTS] = equipements;

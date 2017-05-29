@@ -9,6 +9,7 @@
   const COMPOSITION = "COMPOSITION";
   const FEMME = "FEMME";
   const HORS_POLICE = "HORS_POLICE"
+  const ADS = "ADS"
 
   window.addEventListener("load", function() {
 
@@ -50,7 +51,18 @@
       else {
         equipageForm.presenceHorsPolice.checked = true;
       }
-      console.log("chef de bord = "+tmp);
+      console.log("hors police = "+tmp);
+    }
+
+    tmp = localStorage.getItem(ADS);
+    if (tmp != null) {
+      if (tmp == "false") {
+        equipageForm.presenceADS.checked = false;
+      }
+      else {
+        equipageForm.presenceADS.checked = true;
+      }
+      console.log("ADS = "+tmp);
     }
 
     tmp = localStorage.getItem(COMPOSITION);
@@ -433,6 +445,7 @@
       oequipage.composition = form.compositionEquipage.value;
       oequipage.femme = form.presenceFemme.checked;
       oequipage.hors_police = form.presenceHorsPolice.checked;
+      oequipage.ads = form.presenceADS.checked;
       oequipage.equipements = [];
       if (form.equipementAssaut.checked) {
         oequipage.equipements.push(form.equipementAssaut.value);
@@ -445,6 +458,9 @@
       }
       if (form.lbd.checked) {
         oequipage.equipements.push(form.lbd.value);
+      }
+      if (form.pm.checked) {
+        oequipage.equipements.push(form.pm.value);
       }
       showNotification("Mise a jour de votre équipage", "equipageSuccess");
       oequipageManager.save(NEOCONFIG.es.index, oequipage);
