@@ -267,7 +267,7 @@
     setInterval(getFeaturesInMapExtent, REFRESH_TIME);
   }
 
-
+  // Permet d'ajouter les evenement qui permettent d'indiquer manuellement sa position
   function addMapEvents() {
     // Gestion du click simple sur la carte pour l'initialisation manuelle
     // de sa position en attente du fix GPS
@@ -369,17 +369,17 @@
   	   * callback succes
   	   * @param response //reponse d'ElasticSearch
   	   */
-      var onSuccess = function(response){
-	    if(response.hits.hits){
-	    	  //rafraichir la carte
-  	          omap.refreshPositions(response.hits.hits);
-  	          //noter la date de la query
-  	          lastDateQuery = Date.now();
-  	          if (allowXHR) {
-  	            allowXHR = false;
-  	          }
-  	      }
-  	  };
+       var onSuccess = function(response){
+         if(response.hits.hits){
+           //rafraichir la carte
+           omap.refreshPositions(response.hits.hits);
+           //noter la date de la query
+           lastDateQuery = Date.now();
+           if (allowXHR) {
+             allowXHR = false;
+           }
+         }
+       };
   	  //checher/executer
 	  oes.searchExec(searchParams, onSuccess, null);
 
@@ -429,6 +429,7 @@
   // Permet de mettre a jour dynamiquement un equipage
   function refreshEquipage(form) {
     if (form.chefDeBord.checked) {
+      // oequipage.id = ouser.id;
       oequipage.composition = form.compositionEquipage.value;
       oequipage.femme = form.presenceFemme.checked;
       oequipage.hors_police = form.presenceHorsPolice.checked;
@@ -549,7 +550,7 @@
             console.error(error);
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, lancement geoloc comme dans la version 1.0
-            console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
+            console.log("Chef de bord non coche,Equipage non present dans ES, lancement geoloc");
             document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
             startUserMode();
@@ -563,7 +564,7 @@
             oequipage.equipements = equipageResult._source.equipage_equipements;
             oequipage.date_creation = equipageResult._source.equipage_date_creation;
             showNotification("Vous rejoignez un équipage", "equipageInfo");
-            console.log("Chef de bord non coche -> je rejoins l'equipage "+oequipage.id+" , geoloc desactivee");
+            console.log("Chef de bord non coche -> je rejoins l'equipage "+oequipage.id);
             document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
             startUserMode();
