@@ -11,6 +11,7 @@ var EquipageManager = function (es)
   this._EQUIPAGE_DATE_CREATION = "equipage_date_creation";
   this._EQUIPAGE_X = "equipage_x";
   this._EQUIPAGE_Y = "equipage_y";
+    this._EQUIPAGE_ACCUR = "equipage_accur";
   this._EQUIPAGE_TYPE = "equipage_type";
   this._EQUIPAGE_TIMESTAMP = "equipage_timestamp";
 
@@ -48,26 +49,28 @@ EquipageManager.prototype.saveAsChefDeBord = function (index, equipage, user) {
   if (updateEquipageLocation && equipage.ESid != undefined) {
     equipage.x = user.x;
     equipage.y = user.y;
+    equipage.accur = user.accuracy;
     equipage.type = form.type.value;
     equipage.timestamp = Date.now();
     this.save(NEOCONFIG.es.index, equipage);
   }
 }
 
-EquipageManager.prototype.save = function (index, equipage) {
+EquipageManager.prototype.save = function (index, equipage, notification) {
   if (equipage.ESid == null) {
     this.create(index, equipage);
   } else {
-    this.update(index, equipage);
+    this.update(index, equipage, notification);
   }
 }
 
 EquipageManager.prototype.create = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.type, equipage.timestamp);
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.accur, equipage.type, equipage.timestamp);
 
   var params = this.getCreateEquipageParams(index, doc);
 
   var onSuccess = function(response, error) {
+    showNotification("Création de votre équipage", "equipageSuccess");
     console.log("ajout equipage ok");
     console.log(response);
     equipage.ESid = response._id;
@@ -78,13 +81,16 @@ EquipageManager.prototype.create = function (index, equipage) {
   this.es.indexExec(params, onSuccess, null);
 }
 
-EquipageManager.prototype.update = function (index, equipage) {
-  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.type, equipage.timestamp);
+EquipageManager.prototype.update = function (index, equipage, notification) {
+  var doc = this.createDocument(equipage.id, equipage.composition, equipage.ads, equipage.femme, equipage.hors_police, equipage.equipements, equipage.date_creation, equipage.x, equipage.y, equipage.accur, equipage.type, equipage.timestamp);
 
   var params = this.getUpdateEquipageParams(index, equipage.ESid, doc);
 
   var onSuccess = function(response, error) {
     console.log("update equipage ok");
+    if (notification) {
+      showNotification("Mise a jour de votre équipage", "equipageSuccess");
+    }
     console.log(response);
     equipage.ESid = response._id;
     // sauvegarde dans le localStorage de la date de creation et de l'_id
@@ -95,7 +101,7 @@ EquipageManager.prototype.update = function (index, equipage) {
 };
 
 // atention a la caleur de date_creation
-EquipageManager.prototype.createDocument = function (id, composition, ads, femme, hors_police, equipements, date_creation, x, y, type, timestamp) {
+EquipageManager.prototype.createDocument = function (id, composition, ads, femme, hors_police, equipements, date_creation, x, y, accuracy, type, timestamp) {
   var doc = {};
   doc[this._EQUIPAGE_ID] = id;
   doc[this._EQUIPAGE_COMPOSITION] = composition;
@@ -106,6 +112,7 @@ EquipageManager.prototype.createDocument = function (id, composition, ads, femme
   doc[this._EQUIPAGE_DATE_CREATION] = date_creation;
   doc[this._EQUIPAGE_X] = x;
   doc[this._EQUIPAGE_Y] = y;
+  doc[this._EQUIPAGE_ACCUR] = accuracy;
   doc[this._EQUIPAGE_TYPE] = type;
   doc[this._EQUIPAGE_TIMESTAMP] = timestamp;
   return doc;

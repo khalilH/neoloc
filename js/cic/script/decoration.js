@@ -106,3 +106,31 @@
       })
     ];
   }
+
+  // Fonction de style d'un marker
+  // Permet d'obtenir la bonne icone et couleur d'une feature
+  function markerStyleEquipage() {
+    var zoom = map.getView().getZoom();
+    var color = this.get('color');
+    var suffixe = getColor(color);
+    var type = this.get('type');
+
+    return [
+      new ol.style.Style({
+        text: new ol.style.Text({
+          font: '14px Calibri',
+          fill: new ol.style.Fill({ color: getColorRGB(color) }),
+          offsetY: -15,
+          stroke: new ol.style.Stroke({
+            color: '#fff', width: 2
+          }),
+          text: zoom > 8 ? this.get('equipage_id') : '' // revoir les param de zoom
+        }),
+        image: new ol.style.Icon(({
+          src: zoom < 5 ? 'images/dot'+suffixe+'.png':
+          zoom < 9 ? 'images/'+type+suffixe+'_16.png' :
+          'images/'+type+suffixe+'.png'
+        }))
+      })
+    ];
+  }

@@ -1,8 +1,10 @@
   // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
 
-  var tracking = true;
-  var updateEquipageLocation = false;
+  var tracking = true; // pour le tracking auto
+  var updateEquipageLocation = false; // pour la mise a jour de la localisation d'un equipage;
+
+  // items localStorage
   const INDICATIF_RADIO = "INDICATIF_RADIO";
   const EQUIPAGE_ES_ID = "EQUIPAGE_ES_ID";
   const EQUIPAGE_DATE = "EQUIPAGE_DATE";
@@ -10,7 +12,7 @@
   const COMPOSITION = "COMPOSITION";
   const FEMME = "FEMME";
   const HORS_POLICE = "HORS_POLICE"
-  const ADS = "ADS"
+  const ADS = "ADS";
 
   window.addEventListener("load", function() {
 
@@ -81,6 +83,12 @@
       } else {
         updateEquipageLocation = false;
       }
+      // faire un if pour soit creer un equipage, soit le mettre a jour
+      // if (?) {
+      //   refreshEquipage(equipageForm);
+      // } else {
+      //   createEquipage(?,?,?)
+      // }
       refreshEquipage(equipageForm);
     });
 
@@ -90,7 +98,7 @@
       var regexp = /[a-zA-Z0-9]/;
       if(!regexp.test(event.key)) {
         var length = indicatifRadioInput.value.length;
-          indicatifRadioInput.value = indicatifRadioInput.value.slice(0, length-1);
+        indicatifRadioInput.value = indicatifRadioInput.value.slice(0, length-1);
       }
     });
 
@@ -108,6 +116,7 @@
 
   });
 
+  // Initialise la carte et ses boutons
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
 
@@ -242,10 +251,11 @@
     // Fin d'initialisation de l'objet map
 
     // Gestion de l'evenement lorsque la vue de la carte change
-    map.on('moveend', function(event) {
-      if (!allowXHR) {allowXHR = true;}
+    // map.on('moveend', function(event) {
+      // if (!allowXHR) {allowXHR = true;}
       // getFeaturesInMapExtent();
-    });
+      // n'est plus necessaire dans la version terrain, a supprimer eventuellement
+    // });
 
     // Modification pour le tracking automatique en cas de deplacement de la carte
     map.on('pointerdrag', function(event) {
@@ -259,6 +269,7 @@
     $('#goButton').removeAttr('disabled');
     equipageForm.chefDeBord.removeAttribute('disabled');
     // setInterval(getFeaturesInMapExtent, REFRESH_TIME);
+    // n'est plus necessaire dans la version terrain
   }
 
   // Permet d'ajouter les evenement qui permettent d'indiquer manuellement sa position
@@ -301,7 +312,7 @@
   }
 
   /**
-   * Lancement de l'application en mode user
+   * Lancement de l'application dans la version terrain
    */
   function startUserMode() {
     if (navigator.geolocation) {
@@ -354,37 +365,40 @@
   /**
    * Permet de recuperer et afficher uniquement les features qui seront visibles sur la carte
    */
-  function getFeaturesInMapExtent() {
+   // Cette methode ne sera plus utilisee que dans la version CIC, du coup le raffraichissement pourra
+   // etre plus frequent que 5s, de plus il faudra prendre en compte le choix de l'operateur CIC
+   // d'afficher soit la localisation de tous les terminaux, ou seulement celle des equipages
+  // function getFeaturesInMapExtent() {
+  //
+  //   if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
+  //     //recuperer le filtre de recherche
+  //     var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
+  //
+  // 	  /**
+  // 	   * callback succes
+  // 	   * @param response //reponse d'ElasticSearch
+  // 	   */
+  //      var onSuccess = function(response){
+  //        if(response.hits.hits){
+  //          //rafraichir la carte
+  //          omap.refreshPositions(response.hits.hits);
+  //          //noter la date de la query
+  //          lastDateQuery = Date.now();
+  //          if (allowXHR) {
+  //            allowXHR = false;
+  //          }
+  //        }
+  //      };
+  // 	  //checher/executer
+	//   oes.searchExec(searchParams, onSuccess, null);
+  //
+  //   } else {
+  //   	  console.log('TOO SOON - getFeaturesInMapExtent');
+  //   }
+  // }
 
-    if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
-      //recuperer le filtre de recherche
-      var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
 
-  	  /**
-  	   * callback succes
-  	   * @param response //reponse d'ElasticSearch
-  	   */
-       var onSuccess = function(response){
-         if(response.hits.hits){
-           //rafraichir la carte
-           omap.refreshPositions(response.hits.hits);
-           //noter la date de la query
-           lastDateQuery = Date.now();
-           if (allowXHR) {
-             allowXHR = false;
-           }
-         }
-       };
-  	  //checher/executer
-	  oes.searchExec(searchParams, onSuccess, null);
-
-    } else {
-    	  console.log('TOO SOON - getFeaturesInMapExtent');
-    }
-  }
-
-
-  // permet de mettre a jour le type, l'idRadio
+  // permet de mettre a jour le type, l'idRadio avant une ecriture dans ES
   function refreshId() {
     var idRadio = form.idRadio.value;
     var tmp = idRadio.toUpperCase();
@@ -402,6 +416,7 @@
 
 
   // Permet de mettre automatiquement a jour le type du vehicule sur le formulaire
+  // apres une lecture d'ES
   function refreshInputRadio(neo_type) {
     switch (neo_type) {
       case "bicycle":
@@ -424,7 +439,7 @@
     }
   }
 
-  // Permet de mettre a jour dynamiquement un equipage
+  // Permet de mettre a jour dynamiquement un equipage avant une ecriture dans ES
   function refreshEquipage(form) {
     if (form.chefDeBord.checked) {
       // oequipage.id = ouser.id;
@@ -457,8 +472,8 @@
       if (form.equipementMO.checked) {
         oequipage.equipements.push(form.equipementMO.value);
       }
-      showNotification("Mise a jour de votre équipage", "equipageSuccess");
-      oequipageManager.save(NEOCONFIG.es.index, oequipage);
+      // showNotification("Mise a jour de votre équipage", "equipageSuccess");
+      oequipageManager.save(NEOCONFIG.es.index, oequipage, true);
     } else {
       showNotification("Vous n'etes pas chef de bord", "equipageError");
     }
@@ -710,51 +725,51 @@
     $('#error').fadeIn(500);
   }
 
-  // handler du clic sur le bouton creer un evenement
-  function handleCreateEvent() {
-    var form = document.getElementById('evenementForm');
-    var titre = form.evtTitre.value;
-    var description = form.evtDescription.value;
-    if (titre != '') {
-      addEvent(titre, description);
-    } else {
-      showError('Titre non indiqué', 'evtError');
-    }
-  }
-
-  // ajout d'un evenement dans ES si cela est possible
-  function addEvent(titre, description) {
-    if (ouser.id == null) {
-      showError('Connexion requise', 'idError');
-      return;
-    }
-
-    if (sessionStorage.lastPosition != undefined || isGPSReady) {
-      var docEvent = {};
-      docEvent[_EVENT_TITRE] = titre;
-      var pos = JSON.parse(sessionStorage.lastPosition);
-      docEvent[_EVENT_X] = pos[0];
-      docEvent[_EVENT_Y] = pos[1];
-      docEvent[_EVENT_AUTHOR] = ouser.id;
-      if (description != '') {
-        docEvent[_EVENT_DESCRIPTION] = description;
-      }
-      client.index({
-        index: INDEX,
-        type: EVENT_TYPE,
-        body: docEvent
-      }, function (error, response) {
-        if (error != undefined) {
-          console.error(error);
-        } else {
-          console.log(response);
-          showNotification('Évènement '+titre+' créé', 'evtSuccess');
-          var form = document.getElementById('evenementForm');
-          form.evtTitre.value = '';
-          form.evtDescription.value = '';
-        }
-      });
-    } else {
-        showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
-    }
-  }
+  // // handler du clic sur le bouton creer un evenement
+  // function handleCreateEvent() {
+  //   var form = document.getElementById('evenementForm');
+  //   var titre = form.evtTitre.value;
+  //   var description = form.evtDescription.value;
+  //   if (titre != '') {
+  //     addEvent(titre, description);
+  //   } else {
+  //     showError('Titre non indiqué', 'evtError');
+  //   }
+  // }
+  //
+  // // ajout d'un evenement dans ES si cela est possible
+  // function addEvent(titre, description) {
+  //   if (ouser.id == null) {
+  //     showError('Connexion requise', 'idError');
+  //     return;
+  //   }
+  //
+  //   if (sessionStorage.lastPosition != undefined || isGPSReady) {
+  //     var docEvent = {};
+  //     docEvent[_EVENT_TITRE] = titre;
+  //     var pos = JSON.parse(sessionStorage.lastPosition);
+  //     docEvent[_EVENT_X] = pos[0];
+  //     docEvent[_EVENT_Y] = pos[1];
+  //     docEvent[_EVENT_AUTHOR] = ouser.id;
+  //     if (description != '') {
+  //       docEvent[_EVENT_DESCRIPTION] = description;
+  //     }
+  //     client.index({
+  //       index: INDEX,
+  //       type: EVENT_TYPE,
+  //       body: docEvent
+  //     }, function (error, response) {
+  //       if (error != undefined) {
+  //         console.error(error);
+  //       } else {
+  //         console.log(response);
+  //         showNotification('Évènement '+titre+' créé', 'evtSuccess');
+  //         var form = document.getElementById('evenementForm');
+  //         form.evtTitre.value = '';
+  //         form.evtDescription.value = '';
+  //       }
+  //     });
+  //   } else {
+  //       showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
+  //   }
+  // }

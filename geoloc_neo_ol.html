@@ -111,17 +111,20 @@
        <div id="equipageDiv">
          <div class="row">
            <form id="equipageForm" onsubmit="return false;">
-             <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+             <div class="form-group col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+               <div class="" style="text-align:center;">
+
                <span id="equipageError" class="label label-danger" style="display:none;">erreur</span>
                <span id="equipageInfo" class="label label-info" style="display:none;"></span>
                <span id="equipageSuccess" class="label label-success" style="display:none;"></span>
-               <div class="form-group col-xs-offset-3 col-sm-offset-3">
+             </div>
+               <div class="form-group" style="text-align:center;">
                  <label class="radio-inline">
                    <input type="checkbox" name="chefDeBord">
                    Chef de bord
                  </label>
                </div>
-               <label class="">Composition</label>
+               <label>Composition</label>
                <div class="row">
                  <div class="form-group col-xs-3 col-sm-3">
                    <label class="radio-inline">
@@ -171,6 +174,9 @@
                      1+4
                    </label>
                  </div>
+               </div>
+               <div class="row">
+
                  <div class="form-group col-xs-6 col-sm-6">
                    <label class="radio-inline">
                      <input type="checkbox" name="presenceADS">
@@ -213,7 +219,7 @@
                  <div class="form-group col-xs-6 col-sm-6">
                    <label class="radio-inline">
                      <input type="checkbox" name="taser" value="taser">
-                     TASER
+                     Pistolet Mitrailleur
                    </label>
                  </div>
                  <div class="form-group col-xs-6 col-sm-6">
@@ -225,12 +231,12 @@
                  <div class="form-group col-xs-6 col-sm-6">
                    <label class="radio-inline">
                      <input type="checkbox" name="pm" value="pm">
-                     PM
+                     TASER
                    </label>
                  </div>
                </div>
                <div class="row">
-                 <div class="col-xs-6 col-xs-offset-3 col-sm-6 col-sm-offset-3">
+                 <div class="" style="text-align:center;">
                    <button id="validerModifsBtn" class="btn btn-info" type="button" name="button" style="display:none">Valider modifs</button>
                  </div>
                </div>

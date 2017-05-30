@@ -1,0 +1,123 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Popup de notification */
+.popup {
+  position:absolute;
+  font-family: Calibri;
+  color: #F0F0F0;
+  border-radius: 10px;
+  -webkit-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  -moz-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  text-align:center;
+}
+
+#displayInfo {
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  top: 10px;
+  right: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  -webkit-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  -moz-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+  z-index: 20;
+}
+
+#error {
+  bottom: 1vh;
+  transform: translate(-50%, 0);
+  background-color: #EA4335;
+}
+
+.input-group{
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.imgButton {
+  padding: 3px;
+  border: 2px solid #ddd;
+  background-color: skyblue;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+/* menubar navigation */
+.nav-menubar {
+  margin-right: -21px;
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-menubar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+input, textarea {
+  margin-bottom: 5px;
+}
+
+
+.popup {
+  padding:7px;
+  left: 62.5%;
+  font-size: 1em;
+}
+#notification {
+  bottom: 7.5vh;
+  transform: translate(-50%, 0);
+  background-color: #4285F4;
+}
+
+.menubar {
+  position: fixed;
+  width: 25%;
+  top: 0px;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  border-right: 2px solid #eee;
+}
+
+.main {
+  padding: 0px;
+  width: 75%;
+  position: fixed;
+  top: 0px;
+  bottom: 0;
+  background-color: #f5f5f5;
+  right: 0;
+  left: 25%;
+}
+
+.toggle {
+  width: auto;
+  top: 7px;
+  left: 3em;
+}
+
+.change-display {
+  width: auto;
+  top: 7px;
+  left: 5.5em;
+}
+
+#myForm {
+  text-align: center;
+}
+
+.attribution_perso{
+  font-size: 1rem !important;
+}
