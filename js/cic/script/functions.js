@@ -222,12 +222,14 @@ function addMapEvents() {
   var callback = function(feature, layer) {
     var doc_id = feature.get('doc_id');
     console.log("_id = "+doc_id);
-    if (showEquipage) {
-      searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.equipage, doc_id)
-      oes.getExec(searchParams, onSuccessEquipage, null);
-    } else {
-      searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, doc_id)
-      oes.getExec(searchParams, onSuccessNeo, null);
+    if (!feature.get('isCircle')) {
+      if (showEquipage) {
+        searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.equipage, doc_id)
+        oes.getExec(searchParams, onSuccessEquipage, null);
+      } else {
+        searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, doc_id)
+        oes.getExec(searchParams, onSuccessNeo, null);
+      }
     }
   }
 

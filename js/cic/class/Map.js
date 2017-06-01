@@ -69,6 +69,7 @@ Map.prototype.addMarkerNeo = function(feature, delta) {
   feat.set('neo_id', neo_id);
   feat.set('type', neo_type);
 	feat.set('doc_id', doc_id);
+	feat.set('isCircle', false);
   feat.setStyle(markerStyle);
   vectorSource.addFeature(feat);
 };
@@ -95,6 +96,7 @@ Map.prototype.addCircleNeo = function(feature, delta) {
 		feat.set('color', 'blue');
 	}
 	feat.set('doc_id', doc_id);
+	feat.set('isCircle', true);
   feat.setStyle(circleStyle);
   vectorSource.addFeature(feat);
 };
@@ -147,6 +149,7 @@ Map.prototype.addMarkerEquipage = function(feature, delta) {
 	}
   feat.set('equipage_id', equipage_id);
   feat.set('type', equipage_type);
+	feat.set('isCircle', false);
 	feat.set('doc_id', doc_id);
   feat.setStyle(markerStyleEquipage);
   vectorSource.addFeature(feat);
@@ -174,6 +177,7 @@ Map.prototype.addCircleEquipage = function(feature, delta) {
 		feat.set('color', 'blue');
 	}
 	feat.set('doc_id', doc_id);
+	feat.set('isCircle', true);
   feat.setStyle(circleStyle);
   vectorSource.addFeature(feat);
 };
