@@ -47,9 +47,6 @@ FeatureManager.prototype.getFeatureParams = function (index, type, id){
         index: index,
         type: type,
 				id: id
-        // body: {
-        //   query : { match : {"neo_id" : id }}
-        // }
       };
 
 };

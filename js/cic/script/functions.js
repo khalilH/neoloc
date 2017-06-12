@@ -1,6 +1,3 @@
-// Initialisation de la map, des boutons (center + menu)
-// + Gestion des events (singleclick et moveend)
-
 // boolean pour le mode de representation
 // par defaut on ne represente que les equipages
 var showEquipage = true;
@@ -53,7 +50,7 @@ function initMap() {
     ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
   });
 
-  // Ajout des boutons personalises (toggleMenu + autoCenter)
+  // Ajout des boutons personalises (toggleMenu + changeDisplay)
 
   app.ToggleMenu = function(opt_options) {
     var options = opt_options || {};
@@ -189,7 +186,6 @@ function showEquipageInfos(equipage) {
   } else {
     infosFillDiv.innerHTML += "Pas d'équipement";
   }
-  // infosFillDiv.innerHTML += JSON.stringify(equipage).replace(/"?,"/g, '<br>')+"<br> ===========<br>";
 }
 
 // Permet d'ajouter les evenement qui permettent de cliquer sur une feature
@@ -234,7 +230,6 @@ function addMapEvents() {
   }
 
   mapDiv.addEventListener('mousedown', function(event) {
-    // console.log(event);
     mousedown_x = event.layerX;
     mousedown_y = event.layerY;
   });
@@ -244,28 +239,10 @@ function addMapEvents() {
     mouseup_y = event.layerY;
 
     if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
-
-
       // var toz = map.hasFeatureAtPixel([mouseup_x, mouseup_y], {'hitTolerance':3});
       // console.log(toz);
       infosFillDiv.innerHTML = "";
       map.forEachFeatureAtPixel([mouseup_x, mouseup_y], callback, {'hitTolerance':3});
-
-
-      // ouser.x = coordinates[0];
-      // ouser.y = coordinates[1];
-      // ouser.accuracy = 5;
-      // ouser.heading = 0;
-      // ouser.speed = 0;
-      // console.log(ouser.getPoint());
-      // refreshId();
-      // ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
-      // if (ouser.ESid != null) {
-      //   lastDateUpdate = Date.now();
-      // }
-      // omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
-      // omap.centerMap(ouser.getPoint());
-      // sessionStorage.lastPosition = JSON.stringify(coordinates);
     }
   });
 

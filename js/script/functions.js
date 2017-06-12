@@ -325,11 +325,8 @@
         console.log("J'ai peut etre un document qui existe ES");
         var getParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, _id);
 
-        var onSuccess = function (response, error) {
-          if (error != undefined) {
-            console.error(error);
-            localStorage.removeItem(ES_ID);
-          } else if (!response.found) {
+        var onSuccess = function (response) {
+          if (!response.found) {
             console.log("le document "+_id+" n'existe pas");
             localStorage.removeItem(ES_ID);
           } else {
@@ -349,7 +346,7 @@
           omap.initLocation();
         }
 
-        oes.getExec(getParams, onSuccess, null);
+        oes.getExecREST(_id, onSuccess);
       } else {
         // Je n'ai pas de document qui existe dans ES
         console.log("Je n'ai pas de document qui existe dans ES");
