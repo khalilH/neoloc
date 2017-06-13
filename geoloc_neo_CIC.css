@@ -41,14 +41,6 @@ html, body {
   margin-top: 5px;
 }
 
-.imgButton {
-  padding: 3px;
-  border: 2px solid #ddd;
-  background-color: skyblue;
-  border-radius: 10px;
-  margin-bottom: 5px;
-}
-
 /* menubar navigation */
 .nav-menubar {
   margin-right: -21px;
@@ -77,41 +69,30 @@ input, textarea {
 }
 
 .menubar {
-  position: fixed;
-  width: 25%;
-  top: 0px;
-  bottom: 0;
-  left: 0;
-  z-index: 1000;
-  display: block;
-  padding: 20px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  background-color: #f5f5f5;
-  border-right: 2px solid #eee;
+  display: none;
 }
 
 .main {
   padding: 0px;
-  width: 75%;
+  width: 100%;
   position: fixed;
   top: 0px;
   bottom: 0;
   background-color: #f5f5f5;
   right: 0;
-  left: 25%;
+  left: 0;
 }
 
-.toggle {
+/*.toggle {
   width: auto;
   top: 7px;
   left: 3em;
-}
+}*/
 
 .change-display {
   width: auto;
   top: 7px;
-  left: 5.5em;
+  left: 3em;
 }
 
 #myForm {

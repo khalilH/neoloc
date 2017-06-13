@@ -103,7 +103,7 @@ function initMap() {
   map = new ol.Map({
     controls: ol.control.defaults({
     }).extend([
-      new app.ToggleMenu(),
+      // new app.ToggleMenu(),
       new app.changeDisplay()
     ]),
     target: 'map',
