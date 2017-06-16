@@ -52,8 +52,9 @@
   var oequipageManager = new EquipageManager(oes);
 
   // Test du navigateur
-  var regexp = /Firefox/;
-  if (!regexp.test(navigator.userAgent)) {
+  var regexp1 = /Firefox/;
+  var regexp2 = /Chrome\/47\.0/;
+  if (!regexp1.test(navigator.userAgent) && !regexp2.test(navigator.userAgent)) {
     document.getElementById('firefox-missing').style.display = "block";
   } else {
     initMap();
