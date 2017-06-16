@@ -60,7 +60,8 @@
 
   // Test du navigateur
   var regexp = /Firefox/;
-  if (!regexp.test(navigator.userAgent)) {
+  if (false) {
+  // if (!regexp.test(navigator.userAgent)) {
     document.getElementById('firefox-missing').style.display = "block";
   } else {
     initMap();

@@ -23,6 +23,11 @@
   <script src="jquery-3.1.1.min.js"></script>
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+
+  <script src="js/qr/html5-qrcode-modifie.js" charset="utf-8"></script>
+  <script src="js/qr/jsqrcode-combined.js" charset="utf-8"></script>
+  <script src="js/qr/qrcode.js" charset="utf-8"></script>
+
 </head>
 <body>
 
@@ -106,6 +111,25 @@
             </form>
           </div>
 		   -->
+       <!-- <div id="idInputDiv" class="input-group">
+         <input id="indicatifRadioInput" type="text" class="form-control" name="idRadio" placeholder="Indicatif radio">
+         <span class="input-group-btn">
+           <button id="goButton" class="btn btn-info active" type="button" onclick="login()">Go</button>
+         </span>
+       </div> -->
+       <!-- Exemple de sous-menu  -->
+       <li onclick="toggle('qrMenu')"><a href="#">Appairage</a></li>
+         <div class="row">
+           <div id='qrMenu' class="form-group col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+           <div id="zzz"></div>
+
+           <input id="imgInput" type="file" accept="image/*;capture=camera">
+           <button class="btn btn-info" name="button" onclick="decode()">decode</button>
+           <span id="plaque" style="font-size:20px;color:blue;"></span>
+           <img id="img" src="#" alt="your image" width="300" height="300" style="display:none;">
+           <canvas id="qr-canvas" width="300" height="300" style="display:none;"></canvas>
+         </div>
+       </div>
 
        <li onclick="toggle('equipageDiv')"><a href="#">Équipage</a></li>
        <div id="equipageDiv">
@@ -125,6 +149,7 @@
                  </label>
                </div>
                <label>Composition</label>
+
                <div class="row">
                  <div class="form-group col-xs-3 col-sm-3">
                    <label class="radio-inline">
