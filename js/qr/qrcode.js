@@ -21,7 +21,12 @@ function decode() {
   var img = document.getElementById('img');
 
   // context.drawImage(img, 0, 0);
-  context.drawImage(img, 0, 0, 300, 300);
+  var ratio = img.width / img.height;
+  if (ratio == 4/3) {
+    context.drawImage(img, 0, 0, 652, 489);
+  } else {
+    context.drawImage(img, 0, 0, 652, 366);
+  }
 
   try {
       qrcode.decode();
