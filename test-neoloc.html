@@ -7,8 +7,12 @@
   <script src="elasticsearch/elasticsearch.jquery.js"></script>
 </head>
 <body>
-  robotoz
-  <input id="saisie" type="text" name="indicatif">
+  <input id="key" type="text" name="key" placeholder="key">
+  <input id="value" type="text" name="value" placeholder="value">
+  <input id="remove" type="text" name="value" placeholder="remove">
+  <button type="button" name="button" onclick="add()">Add</button>
+  <button type="button" name="button" onclick="list()">List</button>
+  <button type="button" name="button" onclick="remove()">Remove</button>
   <div id='error' style='color:red;'>
 
   </div>
@@ -17,18 +21,29 @@
   </div>
 
   <script type="text/javascript">
-    var input = document.getElementById('saisie');
+    var key = document.getElementById('key');
+    var value = document.getElementById('value');
+    var remove = document.getElementById('remove');
+    var response = document.getElementById('response');
 
-    var lastLength = input.value.length;
+    function add() {
+      localStorage.setItem(key.value, value.value);
+    }
+
+    function list() {
+      response.innerHTML = JSON.stringify(localStorage);
+    }
+
+    function remove() {
+      localStorage.removeItem(remove.value);
+    }
 
 
-    input.addEventListener('keyup', function(event) {
-      var regexp = /[a-zA-Z0-9]/;
-      if(!regexp.test(event.key)) {
-        var length = input.value.length;
-          input.value = input.value.slice(0, length-1);
-      }
-    })
+
+
+
+
+
 
   </script>
 </body>

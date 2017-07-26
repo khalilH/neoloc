@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>POC Geoloc CIC</title>
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="geoloc_neo_CIC.css">
+  <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
+
+  <script src="config.js"></script>
+  <script src="js/class/ESManager.js"></script>
+  <script src="js/cic/class/Map.js"></script>
+  <script src="js/cic/class/FeatureManager.js"></script>
+  <script src="js/cic/class/EquipageManager.js"></script>
+  <script src="js/class/Equipage.js"></script>
+  <script src="js/class/User.js"></script>
+  <script src="js/cic/script/functions.js"></script>
+  <script src="js/cic/script/decoration.js"></script>
+
+  <script src="openlayers/ol.js"></script>
+  <script src="proj4js/dist/proj4-src.js"></script>
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="elasticsearch/elasticsearch.jquery.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+  <div id="displayInfo" class="">
+
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div id="sidebar" class="menubar">
+        <ul class="nav nav-menubar">
+
+          <!-- Formulaire d'identification -->
+          <li onclick="toggle('searchDiv')"><a href="#">Recherche</a></li>
+          <div id="searchDiv" >
+            <form id="myForm" onsubmit="return false;">
+              <div class="row">
+                <div class="form-group col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+                  <div id="searchInputDiv" class="input-group">
+                    <input id="indicatifRadioInput" type="text" class="form-control" name="idRadio" placeholder="Indicatif radio">
+                    <span class="input-group-btn">
+                      <button id="searchButton" class="btn btn-info active" type="button" onclick="search()">Rechercher</button>
+                    </span>
+                  </div>
+                  <span id="searchError" class="label label-danger" style="display:none;"></span>
+                  <span id="searchInfo" class="label label-info" style="display:none;"></span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Exemple de sous-menu  -->
+          <li onclick="toggle('infos')"><a href="#">Statistiques</a></li>
+          <div id="infos">
+
+            <div class="row">
+              <div id="infosFill" class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              </div>
+            </div>
+          </div>
+
+          <!-- Exemple de sous-menu  -->
+          <li onclick="toggle('filtre')"><a href="#">Filtres</a></li>
+          <div id="filtre">
+
+            <div class="row">
+              <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0 col-md-10 col-md-offset-1">
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Exemple de sous-menu  -->
+          <!-- <li onclick="toggle('loremDiv')"><a href="#">Lorem</a></li>
+          <div class="row">
+            <p class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1" id="loremDiv">Lorem</p>
+          </div> -->
+
+
+        </ul>
+
+      </div>
+      <div id="map" class="main">
+        <span id="firefox-missing"  style="display:none" class="label label-danger">
+          Votre navigateur n'est pas supporté.<br> Cette application nécessite le navigateur Firefox
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div id="error" class="popup" style="display:none"></div>
+  <div id="notification" class="popup" style="display:none"></div>
+
+
+
+
+<script src="js/cic/script/initNeoloc.js"></script>
+
+
+</body>
+</html>

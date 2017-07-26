@@ -1,10 +1,18 @@
   // Initialisation de la map, des boutons (center + menu)
   // + Gestion des events (singleclick et moveend)
 
-  var tracking = true;
+  var tracking = true; // pour le tracking auto
+  var updateEquipageLocation = false; // pour la mise a jour de la localisation d'un equipage;
+
+  // items localStorage
   const INDICATIF_RADIO = "INDICATIF_RADIO";
   const EQUIPAGE_ES_ID = "EQUIPAGE_ES_ID";
   const EQUIPAGE_DATE = "EQUIPAGE_DATE";
+  const CHEF_DE_BORD = "CHEF_DE_BORD";
+  const COMPOSITION = "COMPOSITION";
+  const FEMME = "FEMME";
+  const HORS_POLICE = "HORS_POLICE"
+  const ADS = "ADS";
 
   window.addEventListener("load", function() {
 
@@ -46,7 +54,18 @@
       else {
         equipageForm.presenceHorsPolice.checked = true;
       }
-      console.log("chef de bord = "+tmp);
+      console.log("hors police = "+tmp);
+    }
+
+    tmp = localStorage.getItem(ADS);
+    if (tmp != null) {
+      if (tmp == "false") {
+        equipageForm.presenceADS.checked = false;
+      }
+      else {
+        equipageForm.presenceADS.checked = true;
+      }
+      console.log("ADS = "+tmp);
     }
 
     tmp = localStorage.getItem(COMPOSITION);
@@ -56,36 +75,48 @@
     }
     // Recuperation des champs de saisie TERMINEE <----
 
+    // Bouton de mise a jour de l'equipage
     var validerModifsBtn = document.getElementById("validerModifsBtn");
     validerModifsBtn.addEventListener('click', function() {
+      if (equipageForm.chefDeBord.checked) {
+        updateEquipageLocation = true;
+      } else {
+        updateEquipageLocation = false;
+      }
+      // faire un if pour soit creer un equipage, soit le mettre a jour
+      // if (?) {
+      //   refreshEquipage(equipageForm);
+      // } else {
+      //   createEquipage(?,?,?)
+      // }
       refreshEquipage(equipageForm);
-      showNotification("Mise a jour de votre équipage", "equipageSuccess");
     });
 
+    // Controle de la saisie de l'indicatif radio
     var indicatifRadioInput = document.getElementById('indicatifRadioInput');
     indicatifRadioInput.addEventListener('keyup', function(event) {
       var regexp = /[a-zA-Z0-9]/;
       if(!regexp.test(event.key)) {
         var length = indicatifRadioInput.value.length;
-          indicatifRadioInput.value = indicatifRadioInput.value.slice(0, length-1);
+        indicatifRadioInput.value = indicatifRadioInput.value.slice(0, length-1);
       }
     });
 
-
-    // Orientation de la tablette
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', deviceOrientationHandler, false);
-      showNotification("DeviceOrientation available", "idInfo")
-    }
-
-    function deviceOrientationHandler(eventData) {
-      if (tracking) {
-        // map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
-      }
-    }
+    // // Orientation auto de la map avec DeviceOrientationEvent
+    // if (window.DeviceOrientationEvent) {
+    //   window.addEventListener('deviceorientation', deviceOrientationHandler, false);
+    //   showNotification("DeviceOrientation available", "idInfo")
+    // }
+    //
+    // function deviceOrientationHandler(eventData) {
+    //   if (tracking) {
+    //     // map.getView().setRotation(degreeToRad(Math.trunc(eventData.alpha)))
+    //   }
+    // }
 
   });
 
+  // Initialise la carte et ses boutons
   function initMap() {
     proj4.defs("EPSG:2154", LAMBERT93);
 
@@ -128,29 +159,7 @@
       ' title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
     });
 
-    // Ajout des boutons personalises (centerMap + toggleMenu + autoCenter)
-    app.RecenterMap = function(opt_options) {
-      var options = opt_options || {};
-      var button = document.createElement('button');
-      button.innerHTML = '<span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span>';
-
-      var this_ = this;
-      var handleRecenterMap = function() {
-        omap.recenterMap();
-
-      };
-      button.addEventListener('click', handleRecenterMap, false);
-
-      var element = document.createElement('div');
-      element.className = 'centerButton ol-unselectable ol-control';
-      element.appendChild(button);
-
-      ol.control.Control.call(this, {
-        element: element,
-        target: options.target
-      });
-
-    };
+    // Ajout des boutons personalises (toggleMenu + autoCenter)
 
     app.ToggleMenu = function(opt_options) {
       var options = opt_options || {};
@@ -201,14 +210,12 @@
 
     };
 
-    ol.inherits(app.RecenterMap, ol.control.Control);
     ol.inherits(app.ToggleMenu, ol.control.Control);
     ol.inherits(app.AutoCenter, ol.control.Control);
 
     map = new ol.Map({
       controls: ol.control.defaults({
       }).extend([
-        new app.RecenterMap(),
         new app.ToggleMenu(),
         new app.AutoCenter()
       ]),
@@ -244,10 +251,11 @@
     // Fin d'initialisation de l'objet map
 
     // Gestion de l'evenement lorsque la vue de la carte change
-    map.on('moveend', function(event) {
-      if (!allowXHR) {allowXHR = true;}
-      getFeaturesInMapExtent();
-    });
+    // map.on('moveend', function(event) {
+      // if (!allowXHR) {allowXHR = true;}
+      // getFeaturesInMapExtent();
+      // n'est plus necessaire dans la version terrain, a supprimer eventuellement
+    // });
 
     // Modification pour le tracking automatique en cas de deplacement de la carte
     map.on('pointerdrag', function(event) {
@@ -260,82 +268,92 @@
     // Suppression de la class disabled (reste present apres un F5)
     $('#goButton').removeAttr('disabled');
     equipageForm.chefDeBord.removeAttribute('disabled');
-    setInterval(getFeaturesInMapExtent, REFRESH_TIME);
+    // setInterval(getFeaturesInMapExtent, REFRESH_TIME);
+    // n'est plus necessaire dans la version terrain
   }
 
+  // Permet d'ajouter les evenement qui permettent d'indiquer manuellement sa position
+  function addMapEvents() {
+    // Gestion du click simple sur la carte pour l'initialisation manuelle
+    // de sa position en attente du fix GPS
+    var mapDiv = document.getElementById('map');
+    var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+
+    mapDiv.addEventListener('mousedown', function(event) {
+      console.log(event);
+      mousedown_x = event.layerX;
+      mousedown_y = event.layerY;
+    });
+
+    mapDiv.addEventListener('mouseup', function(event) {
+      mouseup_x = event.layerX;
+      mouseup_y = event.layerY;
+
+      if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
+        if(!isGPSReady) {
+          var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
+          ouser.x = coordinates[0];
+          ouser.y = coordinates[1];
+          ouser.accuracy = 5;
+          ouser.heading = 0;
+          ouser.speed = 0;
+          console.log(ouser.getPoint());
+          refreshId();
+          ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
+          if (ouser.ESid != null) {
+            lastDateUpdate = Date.now();
+          }
+          omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+          omap.centerMap(ouser.getPoint());
+          sessionStorage.lastPosition = JSON.stringify(coordinates);
+        }
+      }
+    });
+  }
 
   /**
-   * Lancement de l'application en mode user
+   * Lancement de l'application dans la version terrain
    */
   function startUserMode() {
     if (navigator.geolocation) {
       openNotification("Géolocalisation en cours, cliquez sur la carte pour indiquer votre position");
-      var point;
 
-      //recuperer le filtre de recherche
-      var searchParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser.id);
-      /**
-       * onsuccess
-       * initialiser l'utilisateur et ses interactions avec la carte
-       */
-      var onSuccess = function(response, error){
-          if (error != undefined) {
-              console.error(error);
-            } else if (response.hits.total == 0) {
-              console.log(ouser.id+' non present dans la base');
-            } else {
-              var feature = response.hits.hits[0];
-              ouser.ESid = feature._id;
-              //console.log(ouser.ESid);
-              ouser.x = feature._source.neo_x;
-              ouser.y = feature._source.neo_y;
-              ouser.type = feature._source.neo_type;
-              refreshInputRadio(ouser.type);
-              sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
-              omap.centerMapWithZoom(ouser.getPoint());
-            }
+      //Recuperer _id de mon document de type neo
+      var _id = localStorage.getItem(ES_ID);
+      if (_id != null) {
+        // J'ai peut etre un document qui existe ES
+        console.log("J'ai peut etre un document qui existe ES");
+        var getParams = ofeature.getFeatureParams(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, _id);
 
-            // Gestion du click simple sur la carte pour l'initialisation manuelle
-            // de sa position en attente du fix GPS
-            var mapDiv = document.getElementById('map');
-            var mousedown_x, mousedown_y, mouseup_x, mouseup_y;
+        var onSuccess = function (response) {
+          if (!response.found) {
+            console.log("le document "+_id+" n'existe pas");
+            localStorage.removeItem(ES_ID);
+          } else {
+            console.log("Le document "+_id+" existe");
+            console.log(response);
+            ouser.ESid = response._id;
+            ouser.x = response._source.neo_x;
+            ouser.y = response._source.neo_y;
+            ouser.type = response._source.neo_type;
+            ouser.accuracy = response._source.neo_accur;
+            refreshInputRadio(ouser.type);
+            sessionStorage.lastPosition = JSON.stringify(ouser.getPoint());
+            omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+            omap.centerMapWithZoom(ouser.getPoint());
+          }
+          addMapEvents();
+          omap.initLocation();
+        }
 
-            mapDiv.addEventListener('mousedown', function(event) {
-              console.log(event);
-              mousedown_x = event.layerX;
-              mousedown_y = event.layerY;
-            });
-
-            mapDiv.addEventListener('mouseup', function(event) {
-              mouseup_x = event.layerX;
-              mouseup_y = event.layerY;
-
-              if (mousedown_x == mouseup_x && mousedown_y == mouseup_y) {
-                if(!isGPSReady) {
-                  var coordinates = map.getCoordinateFromPixel([mouseup_x, mouseup_y]);
-                  ouser.x = coordinates[0];
-                  ouser.y = coordinates[1];
-                  ouser.accuracy = 5;
-                  ouser.heading = 0;
-                  ouser.speed = 0;
-                  console.log(ouser.getPoint());
-                  refreshId();
-                  ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
-                  if (ouser.ESid != null) {
-                	  lastDateUpdate = Date.now();
-                  }
-                  omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
-                  omap.centerMap(ouser.getPoint());
-                  sessionStorage.lastPosition = JSON.stringify(coordinates);
-                }
-              }
-            });
-            omap.initLocation();
-      };//fin onSuccess
-
-  	  //checher/executer
-	  oes.searchExec(searchParams, onSuccess, null);
-    }else{
+        oes.getExecREST(_id, onSuccess);
+      } else {
+        // Je n'ai pas de document qui existe dans ES
+        console.log("Je n'ai pas de document qui existe dans ES");
+        addMapEvents();
+        omap.initLocation();
+      }
+    } else{
       showError("Géolocalisation non supportée");
     }
   }
@@ -344,37 +362,40 @@
   /**
    * Permet de recuperer et afficher uniquement les features qui seront visibles sur la carte
    */
-  function getFeaturesInMapExtent() {
+   // Cette methode ne sera plus utilisee que dans la version CIC, du coup le raffraichissement pourra
+   // etre plus frequent que 5s, de plus il faudra prendre en compte le choix de l'operateur CIC
+   // d'afficher soit la localisation de tous les terminaux, ou seulement celle des equipages
+  // function getFeaturesInMapExtent() {
+  //
+  //   if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
+  //     //recuperer le filtre de recherche
+  //     var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
+  //
+  // 	  /**
+  // 	   * callback succes
+  // 	   * @param response //reponse d'ElasticSearch
+  // 	   */
+  //      var onSuccess = function(response){
+  //        if(response.hits.hits){
+  //          //rafraichir la carte
+  //          omap.refreshPositions(response.hits.hits);
+  //          //noter la date de la query
+  //          lastDateQuery = Date.now();
+  //          if (allowXHR) {
+  //            allowXHR = false;
+  //          }
+  //        }
+  //      };
+  // 	  //checher/executer
+	//   oes.searchExec(searchParams, onSuccess, null);
+  //
+  //   } else {
+  //   	  console.log('TOO SOON - getFeaturesInMapExtent');
+  //   }
+  // }
 
-    if (Date.now() - lastDateQuery > 5 * SECOND_IN_MILLIS || allowXHR) {
-      //recuperer le filtre de recherche
-      var searchParams = ofeature.getFeaturesInMapExtentSearchParams(NEOCONFIG.es.index);
 
-  	  /**
-  	   * callback succes
-  	   * @param response //reponse d'ElasticSearch
-  	   */
-      var onSuccess = function(response){
-	    if(response.hits.hits){
-	    	  //rafraichir la carte
-  	          omap.refreshPositions(response.hits.hits);
-  	          //noter la date de la query
-  	          lastDateQuery = Date.now();
-  	          if (allowXHR) {
-  	            allowXHR = false;
-  	          }
-  	      }
-  	  };
-  	  //checher/executer
-	  oes.searchExec(searchParams, onSuccess, null);
-
-    }else{
-    	  console.log('TOO SOON - getFeaturesInMapExtent');
-    }
-  }
-
-
-  // permet de mettre a jour le type, l'idRadio
+  // permet de mettre a jour le type, l'idRadio avant une ecriture dans ES
   function refreshId() {
     var idRadio = form.idRadio.value;
     var tmp = idRadio.toUpperCase();
@@ -382,13 +403,17 @@
     form.idRadio.value = idRadio;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      ouserSeek.id = idRadio;
-      ouserSeek.type = _type;
+      // ouserSeek.id = idRadio;
+      // ouserSeek.type = _type;
+      ouser.id = idRadio;
+      ouser.type = _type;
+
     }
   }
 
 
   // Permet de mettre automatiquement a jour le type du vehicule sur le formulaire
+  // apres une lecture d'ES
   function refreshInputRadio(neo_type) {
     switch (neo_type) {
       case "bicycle":
@@ -403,31 +428,56 @@
       case "policeman":
       form.type[3].checked = true;
       break;
+      case "fourgon":
+      form.type[4].checked = true;
+      break;
       default:
       console.error("je ne dois pas passer ici "+neo_type);
     }
   }
 
+  // Permet de mettre a jour dynamiquement un equipage avant une ecriture dans ES
   function refreshEquipage(form) {
-    oequipage.composition = form.compositionEquipage.value;
-    oequipage.femme = form.presenceFemme.checked;
-    oequipage.hors_police = form.presenceHorsPolice.checked;
-    oequipage.equipements = [];
-    if (form.equipementAssaut.checked) {
+    if (form.chefDeBord.checked) {
+      // oequipage.id = ouser.id;
+      if (oequipage.id == undefined) {
+        oequipage.id = ouser.id;
+      }
+      if (oequipage.date_creation == undefined) {
+        oequipage.date_creation = Date.now();
+      }
+      oequipage.composition = form.compositionEquipage.value;
+      oequipage.femme = form.presenceFemme.checked;
+      oequipage.hors_police = form.presenceHorsPolice.checked;
+      oequipage.ads = form.presenceADS.checked;
+      oequipage.equipements = [];
+      if (form.equipementAssaut.checked) {
         oequipage.equipements.push(form.equipementAssaut.value);
-    }
-    if (form.grenades.checked) {
+      }
+      if (form.grenades.checked) {
         oequipage.equipements.push(form.grenades.value);
-    }
-    if (form.taser.checked) {
+      }
+      if (form.taser.checked) {
         oequipage.equipements.push(form.taser.value);
-    }
-    if (form.lbd.checked) {
+      }
+      if (form.lbd.checked) {
         oequipage.equipements.push(form.lbd.value);
+      }
+      if (form.pm.checked) {
+        oequipage.equipements.push(form.pm.value);
+      }
+      if (form.equipementMO.checked) {
+        oequipage.equipements.push(form.equipementMO.value);
+      }
+      // showNotification("Mise a jour de votre équipage", "equipageSuccess");
+      oequipageManager.save(NEOCONFIG.es.index, oequipage, true);
+    } else {
+      showNotification("Vous n'etes pas chef de bord", "equipageError");
     }
-    oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
+
+  // Permet de creer un equipage avec une date_creation egale a Date.now()
   function createEquipage(form, indicatif, _id) {
     // Remplissage de l'objet Equipage
     if (_id != undefined) {
@@ -454,6 +504,7 @@
     oequipageManager.save(NEOCONFIG.es.index, oequipage);
   }
 
+  // Permet de desactiver le bouton de lancement
   function disableGoButton() {
     $('#goButton').attr('disabled', 'disabled');
     $('#goButton').addClass('disabled');
@@ -461,12 +512,11 @@
     $('#goButton').addClass('btn-danger');
   }
 
-  // Saisie de l'identifiant Radio
+  // Saisie de l'identifiant Radio + lancement de du service de geolocalisation
   function login() {
     var idRadio = form.idRadio.value;
     var _type = form.type.value;
     if (idRadio != '0000' && idRadio != '' && _type != '') {
-      // Memorisation des saisies (seulement de l'indicatif radio pour l'instant)
       console.log('before '+idRadio);
       var tmp = idRadio.toUpperCase();
       idRadio = tmp.replace(/\s/g,'');
@@ -476,9 +526,12 @@
       ouser.clean();
       ouser.id = idRadio;
       ouser.type = _type;
+
       // Traitement si la case chef de bord est coche
       if (equipageForm.chefDeBord.checked) {
-        // Chercher si un equipage avec le meme indicatif existe et verifier sa date de creation
+
+        updateEquipageLocation = true;
+        // Recherche de l'existance d'un equipage avec le meme indicatif radio
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
         var onSuccess = function(response, error) {
@@ -486,62 +539,60 @@
             console.error(error);
           } else if (response.hits.total == 0) {
             // Equipage non present dans ES, creation possible
-              console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
-              createEquipage(equipageForm, idRadio);
-              document.getElementById("validerModifsBtn").style.display = 'inline';
-              equipageForm.chefDeBord.disabled = true;
-              disableGoButton();
-              startUserMode();
-            } else {
-              var equipageResult = response.hits.hits[0];
-              var timestamp = equipageResult._source.equipage_date_creation;
-              var _id = equipageResult._id;
-              if (Date.now() - timestamp < 6 * HOUR_IN_MILLIS) {
-                var local_id = localStorage.getItem(EQUIPAGE_ES_ID);
-                var local_date = localStorage.getItem(EQUIPAGE_DATE);
-                if (local_id == _id && local_date == timestamp) {
-                  // L'equipage est recent mais je suis celui qui l'a cree donc je pourrai le modifier
-                  document.getElementById("validerModifsBtn").style.display = 'inline';
-                  equipageForm.chefDeBord.disabled = true;
-                  showNotification("Mise a jour possible de l'equipage", "equipageInfo");
-                  disableGoButton();
-                  startUserMode();
-                } else {
-                  // L'equipage est recent, mise a jour non possible, pas de geoloc
-                  showNotification("Impossible de creer l'equipage, geolocation non active", "equipageInfo");
-                }
+            console.log("Creation d'equipage possible equipage "+idRadio+" non present dans elasticsearch");
+            createEquipage(equipageForm, idRadio);
+            document.getElementById("validerModifsBtn").style.display = 'inline';
+            disableGoButton();
+            startUserMode();
+          } else {
+            var equipageResult = response.hits.hits[0];
+            oequipage.ESid = equipageResult._id;
+            oequipage.id = equipageResult._source.equipage_id;
+            oequipage.composition = equipageResult._source.equipage_composition;
+            oequipage.femme = equipageResult._source.equipage_femme;
+            oequipage.hors_Police = equipageResult._source.equipage_hors_police;
+            oequipage.equipements = equipageResult._source.equipage_equipements;
+            oequipage.date_creation = equipageResult._source.equipage_date_creation;
+            if (Date.now() - oequipage.date_creation < 6 * HOUR_IN_MILLIS) {
+              showNotification("Mise a jour possible de l'equipage", "equipageInfo");
             } else {
               console.log("Creation d'equipage possible")
-              createEquipage(equipageForm, idRadio, ESid);
-              document.getElementById("validerModifsBtn").style.display = 'inline';
-              equipageForm.chefDeBord.disabled = true;
-              disableGoButton();
-              startUserMode();
+              createEquipage(equipageForm, idRadio, oequipage.ESid); // mise a jour date de creation
             }
+            document.getElementById("validerModifsBtn").style.display = 'inline';
+            disableGoButton();
+            startUserMode();
           }
         }
 
         oes.searchExec(searchParams, onSuccess, null);
 
       } else {
-        equipageForm.chefDeBord.disabled = true;
         var searchParams = oequipageManager.getEquipageParams(NEOCONFIG.es.index, idRadio);
 
         var onSuccess = function(response, error) {
           if (error != undefined) {
             console.error(error);
           } else if (response.hits.total == 0) {
-            // Equipage non present dans ES, lancement geoloc
-            console.log("Chef de bord non coche -> Equipage non present dans ES, lancement geoloc");
+            // Equipage non present dans ES, lancement geoloc comme dans la version 1.0
+            console.log("Chef de bord non coche,Equipage non present dans ES, lancement geoloc");
+            document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
             startUserMode();
           } else {
             var equipageResult = response.hits.hits[0];
-            var timestamp = equipageResult._source.equipage_date_creation;
-            var indicatif = equipageResult._source.equipage_id;
-            showNotification("Vous rejoignez un équipage. Géolocalisation désactivée", "equipageInfo");
-            console.log("Chef de bord non coche -> je rejoins l'equipage "+indicatif+" , geoloc desactivee");
+            oequipage.ESid = equipageResult._id;
+            oequipage.id = equipageResult._source.equipage_id;
+            oequipage.composition = equipageResult._source.equipage_composition;
+            oequipage.femme = equipageResult._source.equipage_femme;
+            oequipage.hors_Police = equipageResult._source.equipage_hors_police;
+            oequipage.equipements = equipageResult._source.equipage_equipements;
+            oequipage.date_creation = equipageResult._source.equipage_date_creation;
+            showNotification("Vous rejoignez un équipage", "equipageInfo");
+            console.log("Chef de bord non coche -> je rejoins l'equipage "+oequipage.id);
+            document.getElementById("validerModifsBtn").style.display = 'inline';
             disableGoButton();
+            startUserMode();
           }
         }
 
@@ -555,41 +606,13 @@
     }
   }
 
-
-  const CHEF_DE_BORD = "CHEF_DE_BORD";
-  const COMPOSITION = "COMPOSITION";
-  const FEMME = "FEMME";
-  const HORS_POLICE = "HORS_POLICE"
-
-  // Permet de memoriser les saisies
+  // Permet de memoriser les saisies dans le localStorage a chaque click du bouton 'GO'
   function memoriserSaisies() {
-
-    if (localStorage.getItem(INDICATIF_RADIO) != null) {
-      localStorage.removeItem(INDICATIF_RADIO);
-    }
     localStorage.setItem(INDICATIF_RADIO, form.idRadio.value);
-
-    var equipementForm = document.getElementById('equipageForm');
-
-    if (localStorage.getItem(CHEF_DE_BORD) != null) {
-      localStorage.removeItem(CHEF_DE_BORD)
-    }
-    localStorage.setItem(CHEF_DE_BORD, equipementForm.chefDeBord.checked);
-
-    if (localStorage.getItem(COMPOSITION) != null) {
-      localStorage.removeItem(COMPOSITION)
-    }
-    localStorage.setItem(COMPOSITION, equipementForm.compositionEquipage.value);
-
-    if (localStorage.getItem(FEMME) != null) {
-      localStorage.removeItem(FEMME)
-    }
-    localStorage.setItem(FEMME, equipementForm.presenceFemme.checked);
-
-    if (localStorage.getItem(HORS_POLICE) != null) {
-      localStorage.removeItem(HORS_POLICE)
-    }
-    localStorage.setItem(HORS_POLICE, equipementForm.presenceHorsPolice.checked);
+    localStorage.setItem(CHEF_DE_BORD, equipageForm.chefDeBord.checked);
+    localStorage.setItem(COMPOSITION, equipageForm.compositionEquipage.value);
+    localStorage.setItem(FEMME, equipageForm.presenceFemme.checked);
+    localStorage.setItem(HORS_POLICE, equipageForm.presenceHorsPolice.checked);
   }
 
   // Methode permettant d'afficher et de cacher le menu (seulement sur smartphone)
@@ -607,9 +630,6 @@
       isMenuVisible = true;
     }
   }
-
-
-
 
   // Utilise proj4js pour la conversion de la lat, lng vers la projection de lambert93
   // Sauvegarde de la dernière position dans sessionStorage
@@ -631,6 +651,8 @@
     ouser.speed = speed;
     refreshId();
     ofeature.save(NEOCONFIG.es.index, NEOCONFIG.es.type.neo, ouser);
+    omap.updateLocalFeatureGeometry(ouser.x, ouser.y);
+    omap.centerMap(ouser.getPoint());
   }
 
 
@@ -654,7 +676,6 @@
       $('#'+name)[0].hidden = true;
     }
   }
-
 
   function degreeToRad(angle) {
     return Math.PI * angle / 180;
@@ -701,51 +722,51 @@
     $('#error').fadeIn(500);
   }
 
-  // handler du clic sur le bouton creer un evenement
-  function handleCreateEvent() {
-    var form = document.getElementById('evenementForm');
-    var titre = form.evtTitre.value;
-    var description = form.evtDescription.value;
-    if (titre != '') {
-      addEvent(titre, description);
-    } else {
-      showError('Titre non indiqué', 'evtError');
-    }
-  }
-
-  // ajout d'un evenement dans ES si cela est possible
-  function addEvent(titre, description) {
-    if (ouser.id == null) {
-      showError('Connexion requise', 'idError');
-      return;
-    }
-
-    if (sessionStorage.lastPosition != undefined || isGPSReady) {
-      var docEvent = {};
-      docEvent[_EVENT_TITRE] = titre;
-      var pos = JSON.parse(sessionStorage.lastPosition);
-      docEvent[_EVENT_X] = pos[0];
-      docEvent[_EVENT_Y] = pos[1];
-      docEvent[_EVENT_AUTHOR] = ouser.id;
-      if (description != '') {
-        docEvent[_EVENT_DESCRIPTION] = description;
-      }
-      client.index({
-        index: INDEX,
-        type: EVENT_TYPE,
-        body: docEvent
-      }, function (error, response) {
-        if (error != undefined) {
-          console.error(error);
-        } else {
-          console.log(response);
-          showNotification('Évènement '+titre+' créé', 'evtSuccess');
-          var form = document.getElementById('evenementForm');
-          form.evtTitre.value = '';
-          form.evtDescription.value = '';
-        }
-      });
-    } else {
-        showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
-    }
-  }
+  // // handler du clic sur le bouton creer un evenement
+  // function handleCreateEvent() {
+  //   var form = document.getElementById('evenementForm');
+  //   var titre = form.evtTitre.value;
+  //   var description = form.evtDescription.value;
+  //   if (titre != '') {
+  //     addEvent(titre, description);
+  //   } else {
+  //     showError('Titre non indiqué', 'evtError');
+  //   }
+  // }
+  //
+  // // ajout d'un evenement dans ES si cela est possible
+  // function addEvent(titre, description) {
+  //   if (ouser.id == null) {
+  //     showError('Connexion requise', 'idError');
+  //     return;
+  //   }
+  //
+  //   if (sessionStorage.lastPosition != undefined || isGPSReady) {
+  //     var docEvent = {};
+  //     docEvent[_EVENT_TITRE] = titre;
+  //     var pos = JSON.parse(sessionStorage.lastPosition);
+  //     docEvent[_EVENT_X] = pos[0];
+  //     docEvent[_EVENT_Y] = pos[1];
+  //     docEvent[_EVENT_AUTHOR] = ouser.id;
+  //     if (description != '') {
+  //       docEvent[_EVENT_DESCRIPTION] = description;
+  //     }
+  //     client.index({
+  //       index: INDEX,
+  //       type: EVENT_TYPE,
+  //       body: docEvent
+  //     }, function (error, response) {
+  //       if (error != undefined) {
+  //         console.error(error);
+  //       } else {
+  //         console.log(response);
+  //         showNotification('Évènement '+titre+' créé', 'evtSuccess');
+  //         var form = document.getElementById('evenementForm');
+  //         form.evtTitre.value = '';
+  //         form.evtDescription.value = '';
+  //       }
+  //     });
+  //   } else {
+  //       showError('Cliquez sur la carte pour indiquer votre position', 'evtInfo');
+  //   }
+  // }

@@ -46,9 +46,7 @@ FeatureManager.prototype.getFeatureParams = function (index, type, id){
 	return {
         index: index,
         type: type,
-        body: {
-          query : { match : {"neo_id" : id }}
-        }
+				id: id
       };
 
 };
@@ -83,9 +81,6 @@ FeatureManager.prototype.getAddFeatureParams = function (index, type, doc){
 };
 
 
-
-
-
 FeatureManager.prototype.save = function (index, type, user){
 
     if (user.ESid == null) {
@@ -93,7 +88,7 @@ FeatureManager.prototype.save = function (index, type, user){
     } else {
   	  this.update(index, type, user);
     }
-    //console.log(user);
+		oequipageManager.saveAsChefDeBord(NEOCONFIG.es.index, oequipage, ouser);
 
 };
 
@@ -123,12 +118,17 @@ FeatureManager.prototype.add = function (index, type, user){
 	var params = this.getAddFeatureParams(index, type, doc);
 
 	var onSuccess = function(response, error){
-		console.log("ajout ok");
-        console.log(response);
-        user.ESid = response._id;
-        if (!allowXHR) {
-          allowXHR = true;
-        }
+		if (error != undefined) {
+			console.error(error);
+		} else {
+			console.log("ajout ok");
+			console.log(response);
+			localStorage.setItem(ES_ID, response._id);
+			user.ESid = response._id;
+			if (!allowXHR) {
+				allowXHR = true;
+			}
+		}
 	};
 
 	this.es.indexExec(params, onSuccess, null);

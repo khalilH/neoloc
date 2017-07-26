@@ -5,7 +5,7 @@
   const MINUTE_IN_MILLIS = 60*SECOND_IN_MILLIS;
   const HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
 
-  const REFRESH_TIME = 6 * SECOND_IN_MILLIS;
+  const REFRESH_TIME = 5 * SECOND_IN_MILLIS;
 
   const EARTH_RADIUS = 6371.01;
 
@@ -49,14 +49,7 @@
   //manager features
   var ofeature = new FeatureManager(oes);
   //utilisateur actif
-  var ouser = new User();
-  //utilisateur à trouver sur la carte
-  var ouserSeek = new User();
-
-  //manager equipage
   var oequipageManager = new EquipageManager(oes);
-  //equipage
-  var oequipage = new Equipage();
 
   // Test du navigateur
   var regexp1 = /Firefox/;

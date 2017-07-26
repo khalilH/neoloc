@@ -1,7 +1,8 @@
 var ESManager = function (host)
 {
 	this.client = new $.es.Client({
-	    hosts: host
+	    hosts: host,
+			apiVersion: '2.4'
 	  });
 };
 
@@ -40,3 +41,34 @@ ESManager.prototype.indexExec = function (indexParams, onSuccess, onError)
 	        }
 	      });
 };
+
+ESManager.prototype.getExec = function (getParams, onSuccess, onError)
+{
+	this.client.get(getParams, function(error, response) {
+		if (error != undefined) {
+			onError(error);
+			console.log(response);
+		} else {
+			onSuccess(response);
+		}
+	});
+}
+
+ESManager.prototype.getExecREST = function (id, onSuccess)
+{
+	var url = 'http://plf.poc.plf-sso.ppol.minint.fr/es/dev_neo/tests/'+id;
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (this.readyState == 4) {
+			if (this.status == 200 || this.status == 404) {
+				var response = JSON.parse(xhr.responseText);
+				onSuccess(response);
+			} else {
+				console.error(this.status);
+				console.error(xhr);
+			}
+		};
+	}
+	xhr.open("GET", url, true);
+	xhr.send();
+}
